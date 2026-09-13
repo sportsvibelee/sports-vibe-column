@@ -1,0 +1,338 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>글쓴이 | 바이브코딩으로 바라본 스포츠산업</title>
+  <meta name="description" content="스포츠 마케팅과 스포츠 행정에 관심을 가진 체대생이 데이터와 바이브코딩으로 스포츠 산업을 분석하는 이유.">
+  <link rel="stylesheet" href="assets/site.css?v=20260907-0335">
+
+<style>
+/* 2026-09 mobile readability patch */
+html,body{max-width:100%;overflow-x:hidden}
+@media(max-width:760px){
+  .nav{padding:10px 16px!important;gap:12px!important}
+  .brand{min-width:0;font-size:13px!important;line-height:1.25!important}
+  .brand-sub{font-size:9.5px!important}
+  .nav-links{gap:10px!important;font-size:12px!important;white-space:nowrap}
+  .page-hero{padding:45px 18px 40px!important}
+  .page-hero h1{font-size:clamp(31px,8.8vw,43px)!important;line-height:1.16!important}
+  .page-hero p{font-size:15px!important;line-height:1.75!important}
+  .about-page{padding-left:16px!important;padding-right:16px!important}
+  .intro-note,.belief-box,.closing-note{padding:24px 20px!important;border-radius:18px!important}
+  .intro-note h2,.belief-box h2,.closing-note h2{font-size:25px!important;line-height:1.35!important}
+  .intro-note p,.story-step p,.belief-grid span,.closing-note p{font-size:14.5px!important;line-height:1.75!important}
+  .writer-tags{gap:7px!important}
+  .story-step{grid-template-columns:42px 1fr!important;gap:13px!important;padding:22px 0!important}
+  .story-num{font-size:15px!important}
+  .story-step h3{font-size:20px!important;line-height:1.4!important}
+  .belief-grid{grid-template-columns:1fr!important}
+  .footer-inner{flex-direction:column!important;gap:8px!important}
+}
+@media(max-width:520px){
+  .nav-links a[href="index.html#themes"]{display:none}
+  .story-step{grid-template-columns:1fr!important}
+}
+</style>
+
+<style id="brand-gap-tight">
+.brand{display:flex!important;align-items:center!important;gap:10px!important}
+.brand-text{display:flex;flex-direction:column;justify-content:center;gap:1px;min-width:0}
+.brand-title{display:block;line-height:1.08;margin:0}
+.brand-sub{display:block!important;margin:1px 0 0!important;line-height:1.05!important}
+@media(max-width:760px){
+  .brand-text{gap:0}
+  .brand-title{line-height:1.05!important}
+  .brand-sub{margin-top:1px!important;line-height:1!important}
+}
+</style>
+
+
+<style id="unified-site-shell-v3">
+:root{
+  --site-shell-max:1280px;
+  --site-header-h:82px;
+}
+.site-header,
+.column-sitebar{
+  height:var(--site-header-h)!important;
+  min-height:var(--site-header-h)!important;
+  background:#fff!important;
+  border-bottom:1px solid #e6ebf0!important;
+  display:flex!important;
+  align-items:center!important;
+  box-sizing:border-box!important;
+}
+.site-header .nav,
+.column-sitebar .inner{
+  width:min(var(--site-shell-max),calc(100% - 48px))!important;
+  height:100%!important;
+  margin:0 auto!important;
+  padding:0!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:space-between!important;
+  gap:22px!important;
+  box-sizing:border-box!important;
+}
+.brand,
+.column-brand{
+  display:flex!important;
+  align-items:center!important;
+  gap:11px!important;
+  min-width:0!important;
+  color:#10243c!important;
+  text-decoration:none!important;
+  font-family:"Pretendard",sans-serif!important;
+}
+.brand-mark,
+.column-brand .mark{
+  width:39px!important;
+  height:39px!important;
+  min-width:39px!important;
+  border-radius:12px!important;
+  display:grid!important;
+  place-items:center!important;
+  background:linear-gradient(145deg,#102f50 12%,#6f244f 58%,#e22846 100%)!important;
+  color:#fff!important;
+  font-size:14px!important;
+  font-weight:900!important;
+  line-height:1!important;
+  box-shadow:0 8px 20px rgba(226,40,70,.13)!important;
+}
+.brand-text,
+.column-brand-text{
+  display:flex!important;
+  flex-direction:column!important;
+  justify-content:center!important;
+  gap:2px!important;
+  min-width:0!important;
+}
+.brand-title,
+.column-brand-title{
+  display:block!important;
+  margin:0!important;
+  color:#10243c!important;
+  font-size:17px!important;
+  font-weight:900!important;
+  line-height:1.08!important;
+  letter-spacing:-.035em!important;
+  white-space:nowrap!important;
+}
+.brand-sub,
+.column-brand-sub{
+  display:block!important;
+  margin:0!important;
+  color:#68788d!important;
+  font-size:11.5px!important;
+  font-weight:650!important;
+  line-height:1.08!important;
+  letter-spacing:-.01em!important;
+  white-space:nowrap!important;
+}
+.nav-links,
+.column-nav{
+  display:flex!important;
+  align-items:center!important;
+  gap:20px!important;
+  font-family:"Pretendard",sans-serif!important;
+  font-size:13px!important;
+  font-weight:750!important;
+  color:#68768a!important;
+}
+.nav-links a,
+.column-nav a{
+  text-decoration:none!important;
+}
+.hero-home .hero-inner,
+.page-hero .hero-inner,
+.hero > .hero-inner{
+  width:min(var(--site-shell-max),calc(100% - 48px))!important;
+  max-width:var(--site-shell-max)!important;
+  margin-left:auto!important;
+  margin-right:auto!important;
+  box-sizing:border-box!important;
+}
+.hero-home,
+.page-hero,
+.hero{
+  width:100%!important;
+  margin-top:0!important;
+  box-sizing:border-box!important;
+}
+@media(max-width:760px){
+  :root{--site-header-h:68px}
+  .site-header .nav,
+  .column-sitebar .inner{
+    width:100%!important;
+    padding:0 16px!important;
+    gap:12px!important;
+  }
+  .brand,
+  .column-brand{
+    gap:9px!important;
+    flex:1 1 auto!important;
+    overflow:hidden!important;
+  }
+  .brand-mark,
+  .column-brand .mark{
+    width:34px!important;
+    height:34px!important;
+    min-width:34px!important;
+    border-radius:10px!important;
+    font-size:12px!important;
+  }
+  .brand-text,
+  .column-brand-text{gap:1px!important}
+  .brand-title,
+  .column-brand-title{
+    font-size:13.5px!important;
+    line-height:1.05!important;
+    letter-spacing:-.04em!important;
+  }
+  .brand-sub,
+  .column-brand-sub{
+    margin-top:1px!important;
+    font-size:9.5px!important;
+    line-height:1!important;
+  }
+  .nav-links,
+  .column-nav{display:none!important}
+  .hero-home .hero-inner,
+  .page-hero .hero-inner,
+  .hero > .hero-inner{
+    width:100%!important;
+    padding-left:18px!important;
+    padding-right:18px!important;
+  }
+}
+@media(max-width:380px){
+  .brand-title,
+  .column-brand-title{font-size:12.6px!important}
+  .brand-sub,
+  .column-brand-sub{font-size:9px!important}
+}
+</style>
+
+
+<style id="writer-contact-restored">
+.writer-contact{
+  margin:34px 0 8px;
+  padding:30px 32px;
+  border:1px solid #dfe6ec;
+  border-radius:22px;
+  background:linear-gradient(145deg,#f8fafc 0%,#ffffff 100%);
+  display:grid;
+  grid-template-columns:minmax(0,1fr) auto;
+  gap:24px;
+  align-items:center;
+  box-shadow:0 10px 28px rgba(16,36,60,.05);
+}
+.writer-contact .contact-kicker{
+  display:block;
+  margin-bottom:7px;
+  color:#6b7b8d;
+  font-size:11px;
+  font-weight:850;
+  letter-spacing:.12em;
+}
+.writer-contact h2{
+  margin:0 0 8px;
+  color:#13283f;
+  font-size:25px;
+  line-height:1.35;
+  letter-spacing:-.035em;
+}
+.writer-contact p{
+  margin:0;
+  color:#667587;
+  font-size:14px;
+  line-height:1.7;
+}
+.writer-contact .contact-mail{
+  min-width:260px;
+  padding:17px 20px;
+  border-radius:14px;
+  background:#102f50;
+  color:#fff;
+  text-decoration:none;
+  text-align:center;
+  font-size:14px;
+  font-weight:800;
+  line-height:1.35;
+  transition:transform .18s ease, box-shadow .18s ease;
+  box-shadow:0 9px 20px rgba(16,47,80,.14);
+}
+.writer-contact .contact-mail:hover{
+  transform:translateY(-2px);
+  box-shadow:0 12px 24px rgba(16,47,80,.19);
+}
+.writer-contact .contact-mail small{
+  display:block;
+  margin-bottom:4px;
+  color:rgba(255,255,255,.68);
+  font-size:10.5px;
+  font-weight:700;
+  letter-spacing:.08em;
+}
+@media(max-width:760px){
+  .writer-contact{
+    margin-top:26px;
+    padding:24px 20px;
+    grid-template-columns:1fr;
+    gap:18px;
+    border-radius:18px;
+  }
+  .writer-contact h2{
+    font-size:22px;
+  }
+  .writer-contact p{
+    font-size:14px;
+  }
+  .writer-contact .contact-mail{
+    min-width:0;
+    width:100%;
+    padding:16px 14px;
+    font-size:13.5px;
+  }
+}
+</style>
+
+</head>
+<body>
+<header class="site-header"><nav class="nav"><a class="brand" href="index.html"><span class="brand-mark">VC</span><span class="brand-text"><span class="brand-title">바이브코딩으로 바라본 스포츠산업</span><span class="brand-sub">Sports Industry × Vibe Coding</span></span></a><div class="nav-links"><a href="index.html#columns">칼럼</a><a href="index.html#themes">주제</a><a class="active" href="about.html">글쓴이</a></div></nav></header>
+
+<section class="page-hero about-hero"><div class="hero-inner"><span class="eyebrow">ABOUT THE WRITER</span><h1>스포츠 산업을 더 설득력 있게<br>바라보고 싶은 체대생입니다.</h1><p>스포츠 마케팅과 스포츠 행정에 관심을 두고, 현장에서 생긴 질문을 데이터와 바이브코딩으로 분석하고 있습니다.</p></div></section>
+
+<main class="about-page about-page-new">
+  <section class="intro-note"><span>안녕하세요.</span><h2>스포츠 마케팅과 스포츠 행정에 관심이 많은 체대생입니다.</h2><div class="writer-tags"><span>체육 전공</span><span>스포츠 마케팅</span><span>스포츠 행정</span><span>데이터 기반 분석</span></div><p>다양한 대외활동과 인턴 경험을 하며 스포츠 산업을 여러 방향에서 접해왔습니다. 일을 기획하고 아이디어를 제안하는 과정에서 자연스럽게 한 가지 질문을 오래 고민하게 됐습니다.</p><blockquote>“좋은 아이디어를 어떻게 하면 사람들에게 더 효과적으로 설득할 수 있을까?”</blockquote></section>
+
+  <section class="story-flow">
+    <div class="story-step"><div class="story-num">01</div><div><span class="story-kicker">EXPERIENCE</span><h3>현장에서 ‘설득’의 어려움을 느꼈습니다.</h3><p>대외활동과 인턴을 통해 제안하고 설명하는 일을 경험했습니다. 좋은 아이디어만으로는 충분하지 않았고, 상대가 납득할 수 있는 근거가 함께 있어야 한다는 점을 배웠습니다.</p></div></div>
+    <div class="story-step"><div class="story-num">02</div><div><span class="story-kicker">ANSWER</span><h3>결국 중요한 것은 검증되고 신뢰할 수 있는 데이터였습니다.</h3><p>경험과 직관은 질문을 만드는 데 큰 도움이 되지만, 판단을 설명하고 사람을 설득하기 위해서는 확인 가능한 수치와 자료가 필요하다고 생각했습니다.</p></div></div>
+    <div class="story-step"><div class="story-num">03</div><div><span class="story-kicker">VIBE CODING</span><h3>그래서 직접 분석해보기 시작했습니다.</h3><p>전문 개발자는 아니지만, 바이브코딩을 활용하면 스포츠 산업에서 생긴 질문을 데이터 분석 모델과 작은 프로그램으로 빠르게 구현해볼 수 있었습니다. 중요한 것은 코딩 자체보다 어떤 질문을 하고 어떤 기준으로 검증할지 정하는 과정이라고 생각합니다.</p></div></div>
+    <div class="story-step"><div class="story-num">04</div><div><span class="story-kicker">SHARE & DISCUSS</span><h3>분석의 시사점을 사람들과 공유하고 토론하고 싶습니다.</h3><p>이 페이지는 결과만 보여주는 포트폴리오가 아니라, 사용한 자료와 분석 가정, 한계까지 함께 공개하는 칼럼 공간입니다. 다른 시선과 의견을 통해 분석이 더 발전할 수 있다고 생각합니다.</p></div></div>
+  </section>
+
+  <section class="belief-box"><div class="belief-label">WHAT I VALUE</div><h2>스포츠 산업을 객관적인 데이터로 바라보되,<br>숫자를 정답처럼 사용하지 않겠습니다.</h2><div class="belief-grid"><div><strong>검증 가능한 자료</strong><span>확인할 수 있는 공개자료와 출처를 중심으로 분석합니다.</span></div><div><strong>가정의 투명성</strong><span>제가 직접 정한 기준과 실제 확인된 사실을 구분합니다.</span></div><div><strong>해석의 범위</strong><span>결과가 어디까지 설명할 수 있고 무엇은 설명하지 못하는지 함께 적습니다.</span></div></div></section>
+
+  <section class="closing-note"><h2>많은 관심과 의견 부탁드립니다.</h2><p>스포츠 마케팅, 스포츠 행정, 경기장, 팬, 데이터 등 스포츠 산업에서 궁금했던 주제를 계속 분석해보려 합니다. 각 칼럼의 댓글에서 다른 해석이나 다음에 다뤘으면 하는 주제를 편하게 남겨주세요.</p><a class="btn btn-dark" href="index.html#columns">칼럼 보러가기 →</a></section>
+
+  <section class="writer-contact">
+    <div>
+      <span class="contact-kicker">CONTACT</span>
+      <h2>의견이나 제안은 메일로도 편하게 보내주세요.</h2>
+      <p>스포츠 산업 관련 분석 주제, 협업 제안, 칼럼에 대한 의견을 자유롭게 보내주시면 확인하겠습니다.</p>
+    </div>
+    <a class="contact-mail" href="mailto:samjunseo0608@naver.com">
+      <small>E-MAIL</small>
+      samjunseo0608@naver.com
+    </a>
+  </section>
+
+</main>
+
+<footer class="site-footer"><div class="footer-inner"><div><strong>바이브코딩으로 바라본 스포츠산업</strong></div><div>© <span id="year"></span></div></div></footer>
+<script src="assets/site.js?v=20260907-0335"></script>
+</body>
+</html>
