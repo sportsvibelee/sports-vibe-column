@@ -1,0 +1,13 @@
+업로드 경로
+/index.html
+/about.html
+/columns/ssg-ad-visibility.html
+/columns/yanggu-sports-marketing.html
+
+이번 수정:
+- 메인/소개/SSG/양구 상단 흰 헤더 높이와 내부 폭 통일
+- VC 로고 크기/그라데이션 통일
+- 모든 페이지의 사이트명: '바이브코딩으로 바라본 스포츠산업'
+- SSG/양구 칼럼에도 영문 'Sports Industry × Vibe Coding' 추가
+- 흰 헤더와 바로 아래 색깔 히어로 영역의 좌우 기준선 통일
+- 모바일은 공통 68px 헤더, 동일한 브랜드 규격 적용
