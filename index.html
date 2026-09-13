@@ -1,0 +1,520 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>바이브코딩으로 바라본 스포츠산업 | 스포츠 산업 데이터 칼럼</title>
+  <meta name="description" content="스포츠산업에서 생긴 질문을 공개데이터와 바이브코딩으로 분석하고, 그 과정과 시사점을 기록하는 칼럼 웹사이트.">
+  <link rel="stylesheet" href="assets/site.css?v=20260907-0335">
+
+<style>
+/* 2026-09 mobile readability patch */
+html,body{max-width:100%;overflow-x:hidden}
+@media (max-width:760px){
+  .site-header{position:relative}
+  .nav{padding:10px 16px!important;gap:12px!important}
+  .brand{min-width:0;font-size:13px!important;line-height:1.25!important}
+  .brand-mark{flex:0 0 auto}
+  .brand-sub{font-size:9.5px!important}
+  .nav-links{gap:10px!important;font-size:12px!important;white-space:nowrap}
+  .hero-home{padding:48px 18px 42px!important}
+  .hero-home .hero-inner{width:100%!important}
+  .hero-title{font-size:clamp(34px,9.5vw,46px)!important;line-height:1.12!important;letter-spacing:-.055em!important}
+  .hero-desc{font-size:15px!important;line-height:1.75!important}
+  .hero-actions{display:grid!important;grid-template-columns:1fr 1fr;gap:9px!important}
+  .hero-actions .btn{text-align:center;padding:12px 10px!important}
+  .method-strip{padding:0 14px!important}
+  .method-card{grid-template-columns:1fr 1fr!important;gap:1px!important}
+  .method-item{padding:18px 14px!important;min-width:0}
+  main{padding-left:16px!important;padding-right:16px!important}
+  .section-head{align-items:flex-end!important;gap:12px!important}
+  .section-head h2{font-size:27px!important}
+  .section-head p{font-size:14px!important;line-height:1.65!important}
+  .article-list,.article-list-home{grid-template-columns:1fr!important;gap:18px!important}
+  .article-card{min-width:0!important}
+  .article-card .thumb{min-height:215px!important}
+  .article-card .copy{padding:20px!important}
+  .article-card h3{font-size:22px!important;line-height:1.3!important}
+  .article-card p{font-size:14px!important;line-height:1.7!important}
+  .topic-grid{grid-template-columns:1fr!important}
+  .about-box,.about-box-data{grid-template-columns:1fr!important;gap:18px!important;padding:26px 22px!important}
+  .subscribe{grid-template-columns:1fr!important;padding:25px 22px!important}
+  .subscribe-actions{width:100%;display:grid!important;grid-template-columns:1fr 1fr;gap:8px!important}
+  .subscribe-actions .btn{text-align:center}
+  .footer-inner{flex-direction:column!important;gap:9px!important}
+}
+@media (max-width:520px){
+  .nav-links a[href="#themes"]{display:none}
+  .method-card{grid-template-columns:1fr!important}
+  .hero-actions,.subscribe-actions{grid-template-columns:1fr}
+  .count-pill{font-size:11px!important}
+}
+</style>
+
+<style id="column-grid-equal-pager">
+/* Equal-size column cards + pager */
+.brand{
+  display:flex!important;
+  align-items:center!important;
+  gap:10px!important;
+}
+.brand-text{
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  gap:1px;
+  min-width:0;
+}
+.brand-title{
+  display:block;
+  line-height:1.08;
+  margin:0;
+}
+.brand-sub{
+  display:block!important;
+  margin:1px 0 0!important;
+  line-height:1.05!important;
+}
+
+.columns-home{overflow:hidden}
+.article-list-home{
+  --cols:2;
+  display:grid!important;
+  grid-template-columns:repeat(var(--cols),minmax(0,1fr))!important;
+  gap:22px!important;
+  align-items:stretch!important;
+  width:100%!important;
+}
+.article-list-home .article-card{
+  display:flex!important;
+  flex-direction:column!important;
+  width:100%!important;
+  min-width:0!important;
+  height:100%!important;
+  border-radius:24px!important;
+  overflow:hidden!important;
+}
+.article-list-home .article-card .thumb{
+  width:100%!important;
+  min-width:0!important;
+  height:250px!important;
+  min-height:250px!important;
+  flex:none!important;
+  background-size:cover!important;
+  background-position:center!important;
+}
+.article-list-home .article-card .copy{
+  display:flex!important;
+  flex:1!important;
+  flex-direction:column!important;
+  width:100%!important;
+  min-width:0!important;
+  padding:26px 26px 24px!important;
+}
+.article-list-home .article-card h3{
+  margin:16px 0 12px!important;
+  font-size:24px!important;
+  line-height:1.38!important;
+  min-height:66px;
+}
+.article-list-home .article-card p{
+  margin:0 0 16px!important;
+  line-height:1.72!important;
+}
+.article-list-home .article-card .card-meta{margin-top:auto!important}
+.article-list-home .article-card .read-link{margin-top:18px!important}
+
+.column-pager{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:10px;
+  margin:26px auto 0;
+  min-height:44px;
+}
+.pager-btn{
+  width:42px;
+  height:42px;
+  border:1px solid #d7e0e8;
+  border-radius:50%;
+  background:#fff;
+  color:#10243c;
+  font:800 17px "Pretendard",sans-serif;
+  cursor:pointer;
+  transition:.18s ease;
+}
+.pager-btn:hover:not(:disabled){transform:translateY(-1px);border-color:#9fb2c4;box-shadow:0 7px 18px rgba(16,36,60,.08)}
+.pager-btn:disabled{opacity:.32;cursor:default}
+.pager-dots{display:flex;align-items:center;gap:7px}
+.pager-dot{
+  width:8px;height:8px;border:0;border-radius:999px;padding:0;
+  background:#cbd6df;cursor:pointer;transition:.18s ease
+}
+.pager-dot.active{width:24px;background:#153f69}
+.pager-status{font-size:12px;font-weight:800;color:#7a8794;min-width:38px;text-align:center}
+.column-pager.is-single{display:none}
+
+@media (min-width:761px){
+  .article-list-home[data-visible-count="1"]{max-width:560px;margin-left:auto;margin-right:auto}
+  .article-list-home[data-visible-count="2"]{max-width:960px;margin-left:auto;margin-right:auto}
+  .article-list-home[data-visible-count="3"]{max-width:none}
+}
+@media (max-width:1050px) and (min-width:761px){
+  .article-list-home{gap:18px!important}
+  .article-list-home .article-card .thumb{height:225px!important;min-height:225px!important}
+  .article-list-home .article-card h3{font-size:22px!important;min-height:61px}
+}
+@media (max-width:760px){
+  .brand-text{gap:0}
+  .brand-title{line-height:1.05!important}
+  .brand-sub{margin-top:1px!important;line-height:1!important}
+  .article-list-home{
+    --cols:1!important;
+    grid-template-columns:1fr!important;
+  }
+  .article-list-home .article-card .thumb{
+    height:220px!important;
+    min-height:220px!important;
+  }
+  .article-list-home .article-card h3{
+    min-height:0;
+    font-size:22px!important;
+  }
+  .column-pager{margin-top:20px}
+}
+</style>
+
+
+<style id="unified-site-shell-v3">
+:root{
+  --site-shell-max:1280px;
+  --site-header-h:82px;
+}
+.site-header,
+.column-sitebar{
+  height:var(--site-header-h)!important;
+  min-height:var(--site-header-h)!important;
+  background:#fff!important;
+  border-bottom:1px solid #e6ebf0!important;
+  display:flex!important;
+  align-items:center!important;
+  box-sizing:border-box!important;
+}
+.site-header .nav,
+.column-sitebar .inner{
+  width:min(var(--site-shell-max),calc(100% - 48px))!important;
+  height:100%!important;
+  margin:0 auto!important;
+  padding:0!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:space-between!important;
+  gap:22px!important;
+  box-sizing:border-box!important;
+}
+.brand,
+.column-brand{
+  display:flex!important;
+  align-items:center!important;
+  gap:11px!important;
+  min-width:0!important;
+  color:#10243c!important;
+  text-decoration:none!important;
+  font-family:"Pretendard",sans-serif!important;
+}
+.brand-mark,
+.column-brand .mark{
+  width:39px!important;
+  height:39px!important;
+  min-width:39px!important;
+  border-radius:12px!important;
+  display:grid!important;
+  place-items:center!important;
+  background:linear-gradient(145deg,#102f50 12%,#6f244f 58%,#e22846 100%)!important;
+  color:#fff!important;
+  font-size:14px!important;
+  font-weight:900!important;
+  line-height:1!important;
+  box-shadow:0 8px 20px rgba(226,40,70,.13)!important;
+}
+.brand-text,
+.column-brand-text{
+  display:flex!important;
+  flex-direction:column!important;
+  justify-content:center!important;
+  gap:2px!important;
+  min-width:0!important;
+}
+.brand-title,
+.column-brand-title{
+  display:block!important;
+  margin:0!important;
+  color:#10243c!important;
+  font-size:17px!important;
+  font-weight:900!important;
+  line-height:1.08!important;
+  letter-spacing:-.035em!important;
+  white-space:nowrap!important;
+}
+.brand-sub,
+.column-brand-sub{
+  display:block!important;
+  margin:0!important;
+  color:#68788d!important;
+  font-size:11.5px!important;
+  font-weight:650!important;
+  line-height:1.08!important;
+  letter-spacing:-.01em!important;
+  white-space:nowrap!important;
+}
+.nav-links,
+.column-nav{
+  display:flex!important;
+  align-items:center!important;
+  gap:20px!important;
+  font-family:"Pretendard",sans-serif!important;
+  font-size:13px!important;
+  font-weight:750!important;
+  color:#68768a!important;
+}
+.nav-links a,
+.column-nav a{
+  text-decoration:none!important;
+}
+.hero-home .hero-inner,
+.page-hero .hero-inner,
+.hero > .hero-inner{
+  width:min(var(--site-shell-max),calc(100% - 48px))!important;
+  max-width:var(--site-shell-max)!important;
+  margin-left:auto!important;
+  margin-right:auto!important;
+  box-sizing:border-box!important;
+}
+.hero-home,
+.page-hero,
+.hero{
+  width:100%!important;
+  margin-top:0!important;
+  box-sizing:border-box!important;
+}
+@media(max-width:760px){
+  :root{--site-header-h:68px}
+  .site-header .nav,
+  .column-sitebar .inner{
+    width:100%!important;
+    padding:0 16px!important;
+    gap:12px!important;
+  }
+  .brand,
+  .column-brand{
+    gap:9px!important;
+    flex:1 1 auto!important;
+    overflow:hidden!important;
+  }
+  .brand-mark,
+  .column-brand .mark{
+    width:34px!important;
+    height:34px!important;
+    min-width:34px!important;
+    border-radius:10px!important;
+    font-size:12px!important;
+  }
+  .brand-text,
+  .column-brand-text{gap:1px!important}
+  .brand-title,
+  .column-brand-title{
+    font-size:13.5px!important;
+    line-height:1.05!important;
+    letter-spacing:-.04em!important;
+  }
+  .brand-sub,
+  .column-brand-sub{
+    margin-top:1px!important;
+    font-size:9.5px!important;
+    line-height:1!important;
+  }
+  .nav-links,
+  .column-nav{display:none!important}
+  .hero-home .hero-inner,
+  .page-hero .hero-inner,
+  .hero > .hero-inner{
+    width:100%!important;
+    padding-left:18px!important;
+    padding-right:18px!important;
+  }
+}
+@media(max-width:380px){
+  .brand-title,
+  .column-brand-title{font-size:12.6px!important}
+  .brand-sub,
+  .column-brand-sub{font-size:9px!important}
+}
+</style>
+
+</head>
+<body>
+<header class="site-header">
+  <nav class="nav">
+    <a class="brand" href="index.html"><span class="brand-mark">VC</span><span class="brand-text"><span class="brand-title">바이브코딩으로 바라본 스포츠산업</span><span class="brand-sub">Sports Industry × Vibe Coding</span></span></a>
+    <div class="nav-links"><a href="#columns">칼럼</a><a href="#themes">주제</a><a href="about.html">글쓴이</a></div>
+  </nav>
+</header>
+
+<section class="hero-home">
+  <div class="hero-inner">
+    <span class="eyebrow">🏟️ SPORTS INDUSTRY × 💻 VIBE CODING</span>
+    <h1 class="hero-title">스포츠 산업을<br><span class="accent">데이터로 바라보고 분석합니다.</span></h1>
+    <p class="hero-desc">현장에서 생긴 궁금증을 검증 가능한 자료로 바꾸고, 바이브코딩으로 직접 분석합니다. 결과뿐 아니라 어떤 가정을 세웠고 어디까지 해석할 수 있는지도 함께 기록합니다.</p>
+    <div class="hero-actions"><a class="btn btn-primary" href="#columns">칼럼 보기 →</a><a class="btn btn-ghost" href="about.html">글쓴이 소개</a></div>
+  </div>
+</section>
+
+<div class="method-strip">
+  <div class="method-card">
+    <div class="method-item"><span class="method-kicker">QUESTION</span><strong>스포츠 산업의 의문</strong><span>현장에서 생긴 질문부터 시작합니다.</span></div>
+    <div class="method-item"><span class="method-kicker">DATA</span><strong>검증 가능한 자료</strong><span>공개자료와 확인 가능한 수치를 사용합니다.</span></div>
+    <div class="method-item"><span class="method-kicker">CODE</span><strong>바이브코딩 분석</strong><span>가설을 코드로 옮겨 빠르게 검증합니다.</span></div>
+    <div class="method-item"><span class="method-kicker">INSIGHT</span><strong>시사점과 토론</strong><span>결과를 해석하고 사람들과 의견을 나눕니다.</span></div>
+  </div>
+</div>
+
+<main>
+  <section id="columns" class="columns-home">
+    <div class="section-head"><div><h2>칼럼 목록</h2><p>스포츠 산업의 질문을 데이터와 코드로 직접 확인한 분석 기록입니다.</p></div><span class="count-pill">현재 2편</span></div>
+    <div class="article-list article-list-home">
+
+      <a class="article-card article-card-live" href="columns/yanggu-sports-marketing.html">
+        <div class="thumb" style="background-image:url('https://img2.yna.co.kr/etc/inner/KR/2024/07/22/AKR20240722051900062_02_i_P4.jpg')"></div>
+        <div class="copy">
+          <span class="tag">🏛️ 스포츠행정 · 데이터분석</span>
+          <h3>지역에서 스포츠대회를 많이 열면, 지역경제가 살아날까?</h3>
+          <p>양구의 스포츠마케팅 경제효과가 실제 방문·숙박·소비 데이터에서는 어떻게 보이는지 양구와 정선을 비교해 확인했습니다.</p>
+          <div class="card-meta"><span>양구 × 정선</span><span>2020–2025</span></div>
+          <span class="read-link">읽어보기 →</span>
+        </div>
+      </a>
+      <a class="article-card article-card-live" href="columns/ssg-ad-visibility.html">
+        <div class="thumb" style="background-image:url('https://thumb.mt.co.kr/cdn-cgi/image/f%3Davif/21/2026/04/2026041909432686751_2.jpg')"></div>
+        <div class="copy"><span class="tag">⚾ 스포츠마케팅 · 바이브코딩</span><h3>야구장 광고, 어디가 진짜 좋은 자리인가</h3><p>SSG 랜더스필드 광고구좌를 현장 관중의 시야라는 한 가지 기준으로 나눠 비교했습니다.</p><div class="card-meta"><span>SSG 랜더스필드</span><span>시야각 분석</span></div><span class="read-link">읽어보기 →</span></div>
+      </a>
+    </div>
+
+    <div class="column-pager" aria-label="칼럼 페이지 이동">
+      <button class="pager-btn pager-prev" type="button" aria-label="이전 칼럼">←</button>
+      <div class="pager-dots" aria-label="칼럼 페이지"></div>
+      <span class="pager-status" aria-live="polite"></span>
+      <button class="pager-btn pager-next" type="button" aria-label="다음 칼럼">→</button>
+    </div>
+  </section>
+
+  <section id="themes">
+    <div class="section-head"><div><h2>이 사이트에서 다룰 것</h2><p>코딩 기술 자체보다 스포츠 산업에서 어떤 질문을 만들고 어떤 근거로 설명할 수 있는지를 중심에 둡니다.</p></div></div>
+    <div class="topic-grid">
+      <div class="topic"><div class="topic-icon">📣</div><h3>스포츠 마케팅</h3><p>광고, 스폰서십, 팬 접점처럼 현장에서 당연하게 받아들이던 요소를 데이터로 다시 봅니다.</p><small>Advertising · Sponsorship · CRM</small></div>
+      <div class="topic"><div class="topic-icon">🏛️</div><h3>스포츠 행정</h3><p>정책, 조직, 시설과 운영처럼 스포츠 산업을 움직이는 구조를 객관적인 자료로 살펴봅니다.</p><small>Policy · Organization · Operation</small></div>
+      <div class="topic"><div class="topic-icon">🧪</div><h3>바이브코딩 실험</h3><p>질문을 구체적으로 정의하고 AI와 코드를 활용해 분석 도구를 만들어가는 과정을 공개합니다.</p><small>Question → Data → Code → Insight</small></div>
+    </div>
+  </section>
+
+  <section class="about-box about-box-data">
+    <div><div class="about-label">WHY THIS SITE?</div><h2>스포츠 산업을<br>‘감’보다 ‘근거’로 바라봅니다.</h2></div>
+    <p>스포츠 현장에서는 경험과 직관이 중요하지만, 사람을 설득하는 순간에는 그 판단을 뒷받침할 근거가 필요하다고 생각했습니다. 이곳에서는 공개자료와 데이터, 명확한 분석 가정을 바탕으로 스포츠 산업을 조금 더 객관적으로 바라보고, 그 과정에서 얻은 시사점을 함께 나눕니다.</p>
+  </section>
+
+  <section class="subscribe"><div><h2>분석은 결론보다 대화에서 더 좋아질 수 있다고 생각합니다.</h2><p>각 칼럼 아래에서 다른 해석, 모델의 아쉬운 점, 다음에 분석해봤으면 하는 주제를 자유롭게 남겨주세요.</p></div><div class="subscribe-actions"><a class="btn btn-dark" href="columns/yanggu-sports-marketing.html#comments">댓글 참여하기</a><a class="btn btn-outline" href="about.html">글쓴이 소개</a></div></section>
+</main>
+
+<footer class="site-footer"><div class="footer-inner"><div><strong>바이브코딩으로 바라본 스포츠산업</strong><br>스포츠 산업을 데이터로 질문하고 분석하는 기록</div><div>© <span id="year"></span> · Built with HTML + Vibe Coding</div></div></footer>
+<script src="assets/site.js?v=20260907-0335"></script>
+
+<script id="column-pager-script">
+(() => {
+  const grid = document.querySelector('.article-list-home');
+  const pager = document.querySelector('.column-pager');
+  if (!grid || !pager) return;
+
+  const cards = Array.from(grid.querySelectorAll('.article-card'));
+  const prev = pager.querySelector('.pager-prev');
+  const next = pager.querySelector('.pager-next');
+  const dots = pager.querySelector('.pager-dots');
+  const status = pager.querySelector('.pager-status');
+
+  let page = 0;
+  let perPage = 3;
+
+  function getPerPage(){
+    if (window.innerWidth <= 760) return 1;
+    if (window.innerWidth <= 1080) return 2;
+    return 3;
+  }
+
+  function render(resetPage = false){
+    const newPerPage = getPerPage();
+    if (resetPage || newPerPage !== perPage) {
+      perPage = newPerPage;
+      page = 0;
+    }
+
+    const totalPages = Math.max(1, Math.ceil(cards.length / perPage));
+    if (page > totalPages - 1) page = totalPages - 1;
+
+    const start = page * perPage;
+    const end = start + perPage;
+
+    cards.forEach((card, i) => {
+      card.hidden = !(i >= start && i < end);
+    });
+
+    const visibleCount = Math.max(0, Math.min(perPage, cards.length - start));
+    grid.style.setProperty('--cols', visibleCount || 1);
+    grid.dataset.visibleCount = String(visibleCount || 1);
+
+    dots.innerHTML = '';
+    for (let i = 0; i < totalPages; i++){
+      const dot = document.createElement('button');
+      dot.className = 'pager-dot' + (i === page ? ' active' : '');
+      dot.type = 'button';
+      dot.setAttribute('aria-label', `${i + 1}페이지로 이동`);
+      dot.addEventListener('click', () => {
+        page = i;
+        render();
+        grid.scrollIntoView({behavior:'smooth', block:'nearest'});
+      });
+      dots.appendChild(dot);
+    }
+
+    status.textContent = `${page + 1} / ${totalPages}`;
+    prev.disabled = page === 0;
+    next.disabled = page === totalPages - 1;
+    pager.classList.toggle('is-single', totalPages <= 1);
+  }
+
+  prev.addEventListener('click', () => {
+    if (page > 0) {
+      page--;
+      render();
+      grid.scrollIntoView({behavior:'smooth', block:'nearest'});
+    }
+  });
+
+  next.addEventListener('click', () => {
+    const totalPages = Math.max(1, Math.ceil(cards.length / perPage));
+    if (page < totalPages - 1) {
+      page++;
+      render();
+      grid.scrollIntoView({behavior:'smooth', block:'nearest'});
+    }
+  });
+
+  let resizeTimer;
+  window.addEventListener('resize', () => {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(() => render(), 120);
+  });
+
+  render(true);
+})();
+</script>
+
+</body>
+</html>
