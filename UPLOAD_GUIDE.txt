@@ -1,26 +1,13 @@
-업로드 파일 안내
+업로드 경로
+/index.html
+/about.html
+/columns/ssg-ad-visibility.html
+/columns/yanggu-sports-marketing.html
 
-기존 GitHub Pages 저장소에서 아래 경로대로 교체/추가하세요.
-
-1. /index.html
-   - 사이트 브랜드명을 "바이브코딩으로 바라본 스포츠산업"으로 변경
-   - 칼럼 수 2편으로 변경
-   - 양구 스포츠행정 칼럼 카드 추가
-
-2. /about.html
-   - 상단/하단 사이트 브랜드명만 "바이브코딩으로 바라본 스포츠산업"으로 변경
-   - 글쓴이 소개 안의 '체대생' 내용은 그대로 유지
-
-3. /columns/ssg-ad-visibility.html
-   - 사이트 브랜드명 변경
-   - 칼럼 상단의 '대학생' 표현 제거
-   - 모바일 가독성 보강
-
-4. /columns/yanggu-sports-marketing.html
-   - 새 양구 칼럼
-   - 모바일에서 카드/표/분석 박스가 화면 밖으로 넘치지 않도록 보강
-
-기존 /assets 폴더(site.css, site.js, comments.js, site-config.js)는 그대로 두면 됩니다.
-
-GitHub에서 위 파일들을 같은 경로로 올린 뒤 Commit changes 하면 됩니다.
-GitHub Pages 반영에는 보통 잠시 시간이 걸릴 수 있으며, 반영 후 강력 새로고침(Ctrl+F5)으로 확인하세요.
+이번 수정:
+- 메인/소개/SSG/양구 상단 흰 헤더 높이와 내부 폭 통일
+- VC 로고 크기/그라데이션 통일
+- 모든 페이지의 사이트명: '바이브코딩으로 바라본 스포츠산업'
+- SSG/양구 칼럼에도 영문 'Sports Industry × Vibe Coding' 추가
+- 흰 헤더와 바로 아래 색깔 히어로 영역의 좌우 기준선 통일
+- 모바일은 공통 68px 헤더, 동일한 브랜드 규격 적용
