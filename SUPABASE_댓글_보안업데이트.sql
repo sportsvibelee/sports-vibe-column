@@ -18,7 +18,7 @@ for insert
 to anon, authenticated
 with check (
   is_visible = true
-  and (page_path like '/sports-vibe-column/columns/%' or page_path like '/columns/%')
+  and (page_path like '/columns/%' or page_path like '/columns/%')
   and char_length(btrim(name)) between 1 and 30
   and char_length(btrim(content)) between 2 and 1000
   and char_length(page_path) between 1 and 300
