@@ -340,17 +340,8 @@ body&gt;div{width:100%!important;height:100%!important;}
 .plotly-graph-div{touch-action:none!important}
 .modebar{opacity:1!important}
 @media(max-width:700px){
-  .modebar{
-    top:auto!important;
-    bottom:10px!important;
-    right:8px!important;
-    background:rgba(255,255,255,.92)!important;
-    border:1px solid rgba(148,163,184,.30)!important;
-    border-radius:10px!important;
-    padding:2px!important;
-  }
-  .modebar-btn{width:38px!important;height:38px!important;padding:8px!important}
-  .modebar-btn svg{width:21px!important;height:21px!important}
+  /* 모바일에서는 툴바가 제목을 덮지 않도록 완전히 숨김 */
+  .modebar{display:none!important}
 }
 &lt;/style&gt;&lt;/head&gt;
 &lt;body&gt;
@@ -569,26 +560,78 @@ window.addEventListener(&quot;load&quot;, function(){
     if(!gd || !window.Plotly) return;
 
     const mobile=window.innerWidth&lt;=700;
+
     if(gd._context){
       gd._context.responsive=true;
-      gd._context.displayModeBar=true;
+      gd._context.displayModeBar=!mobile;
       gd._context.displaylogo=false;
       gd._context.scrollZoom=true;
       gd._context.doubleClick=&quot;reset+autosize&quot;;
     }
 
-    Plotly.relayout(gd,{
+    const relayoutUpdate={
       hovermode:&quot;closest&quot;,
       hoverdistance:mobile?48:30,
       spikedistance:mobile?48:20,
       dragmode:mobile?&quot;pan&quot;:&quot;zoom&quot;,
-      &quot;hoverlabel.font.size&quot;:mobile?14:13
-    });
+      &quot;hoverlabel.font.size&quot;:mobile?14:13,
+
+      /* 자동 범위에서도 0 미만이 나오지 않게 */
+      &quot;xaxis.rangemode&quot;:&quot;nonnegative&quot;,
+      &quot;yaxis.rangemode&quot;:&quot;nonnegative&quot;
+    };
+
+    if(mobile){
+      /* 모바일에서 x축 타이틀이 잘리지 않도록 하단 여백만 확대 */
+      relayoutUpdate[&quot;margin.b&quot;]=108;
+      relayoutUpdate[&quot;margin.t&quot;]=122;
+      relayoutUpdate[&quot;margin.l&quot;]=70;
+      relayoutUpdate[&quot;margin.r&quot;]=24;
+      relayoutUpdate[&quot;xaxis.automargin&quot;]=true;
+      relayoutUpdate[&quot;yaxis.automargin&quot;]=true;
+      relayoutUpdate[&quot;xaxis.title.standoff&quot;]=14;
+      relayoutUpdate[&quot;yaxis.title.standoff&quot;]=12;
+    }
+
+    Plotly.relayout(gd,relayoutUpdate);
+
+    /* 사용자가 드래그/핀치 줌을 해도 x=0, y=0 아래로는 못 내려가게 고정 */
+    let clamping=false;
+
+    function clampNonNegative(){
+      if(clamping || !gd._fullLayout) return;
+
+      const xr=gd._fullLayout.xaxis &amp;&amp; gd._fullLayout.xaxis.range
+        ? gd._fullLayout.xaxis.range.slice() : null;
+      const yr=gd._fullLayout.yaxis &amp;&amp; gd._fullLayout.yaxis.range
+        ? gd._fullLayout.yaxis.range.slice() : null;
+
+      const fix={};
+
+      if(xr &amp;&amp; Number.isFinite(xr[0]) &amp;&amp; Number.isFinite(xr[1]) &amp;&amp; xr[0] &lt; 0){
+        const span=Math.max(xr[1]-xr[0], 0.000001);
+        fix[&quot;xaxis.range&quot;]=[0, span];
+      }
+
+      if(yr &amp;&amp; Number.isFinite(yr[0]) &amp;&amp; Number.isFinite(yr[1]) &amp;&amp; yr[0] &lt; 0){
+        const span=Math.max(yr[1]-yr[0], 0.000001);
+        fix[&quot;yaxis.range&quot;]=[0, span];
+      }
+
+      if(Object.keys(fix).length){
+        clamping=true;
+        Plotly.relayout(gd,fix).finally(function(){ clamping=false; });
+      }
+    }
+
+    gd.on(&quot;plotly_relayout&quot;, clampNonNegative);
 
     let t=null;
     window.addEventListener(&quot;resize&quot;,function(){
       clearTimeout(t);
-      t=setTimeout(function(){ Plotly.Plots.resize(gd); },120);
+      t=setTimeout(function(){
+        Plotly.Plots.resize(gd);
+      },120);
     },{passive:true});
   },760);
 });
@@ -605,17 +648,8 @@ body&gt;div{width:100%!important;height:100%!important;}
 .plotly-graph-div{touch-action:none!important}
 .modebar{opacity:1!important}
 @media(max-width:700px){
-  .modebar{
-    top:auto!important;
-    bottom:10px!important;
-    right:8px!important;
-    background:rgba(255,255,255,.92)!important;
-    border:1px solid rgba(148,163,184,.30)!important;
-    border-radius:10px!important;
-    padding:2px!important;
-  }
-  .modebar-btn{width:38px!important;height:38px!important;padding:8px!important}
-  .modebar-btn svg{width:21px!important;height:21px!important}
+  /* 모바일에서는 툴바가 제목을 덮지 않도록 완전히 숨김 */
+  .modebar{display:none!important}
 }
 &lt;/style&gt;&lt;/head&gt;
 &lt;body&gt;
@@ -834,26 +868,78 @@ window.addEventListener(&quot;load&quot;, function(){
     if(!gd || !window.Plotly) return;
 
     const mobile=window.innerWidth&lt;=700;
+
     if(gd._context){
       gd._context.responsive=true;
-      gd._context.displayModeBar=true;
+      gd._context.displayModeBar=!mobile;
       gd._context.displaylogo=false;
       gd._context.scrollZoom=true;
       gd._context.doubleClick=&quot;reset+autosize&quot;;
     }
 
-    Plotly.relayout(gd,{
+    const relayoutUpdate={
       hovermode:&quot;closest&quot;,
       hoverdistance:mobile?48:30,
       spikedistance:mobile?48:20,
       dragmode:mobile?&quot;pan&quot;:&quot;zoom&quot;,
-      &quot;hoverlabel.font.size&quot;:mobile?14:13
-    });
+      &quot;hoverlabel.font.size&quot;:mobile?14:13,
+
+      /* 자동 범위에서도 0 미만이 나오지 않게 */
+      &quot;xaxis.rangemode&quot;:&quot;nonnegative&quot;,
+      &quot;yaxis.rangemode&quot;:&quot;nonnegative&quot;
+    };
+
+    if(mobile){
+      /* 모바일에서 x축 타이틀이 잘리지 않도록 하단 여백만 확대 */
+      relayoutUpdate[&quot;margin.b&quot;]=108;
+      relayoutUpdate[&quot;margin.t&quot;]=122;
+      relayoutUpdate[&quot;margin.l&quot;]=70;
+      relayoutUpdate[&quot;margin.r&quot;]=24;
+      relayoutUpdate[&quot;xaxis.automargin&quot;]=true;
+      relayoutUpdate[&quot;yaxis.automargin&quot;]=true;
+      relayoutUpdate[&quot;xaxis.title.standoff&quot;]=14;
+      relayoutUpdate[&quot;yaxis.title.standoff&quot;]=12;
+    }
+
+    Plotly.relayout(gd,relayoutUpdate);
+
+    /* 사용자가 드래그/핀치 줌을 해도 x=0, y=0 아래로는 못 내려가게 고정 */
+    let clamping=false;
+
+    function clampNonNegative(){
+      if(clamping || !gd._fullLayout) return;
+
+      const xr=gd._fullLayout.xaxis &amp;&amp; gd._fullLayout.xaxis.range
+        ? gd._fullLayout.xaxis.range.slice() : null;
+      const yr=gd._fullLayout.yaxis &amp;&amp; gd._fullLayout.yaxis.range
+        ? gd._fullLayout.yaxis.range.slice() : null;
+
+      const fix={};
+
+      if(xr &amp;&amp; Number.isFinite(xr[0]) &amp;&amp; Number.isFinite(xr[1]) &amp;&amp; xr[0] &lt; 0){
+        const span=Math.max(xr[1]-xr[0], 0.000001);
+        fix[&quot;xaxis.range&quot;]=[0, span];
+      }
+
+      if(yr &amp;&amp; Number.isFinite(yr[0]) &amp;&amp; Number.isFinite(yr[1]) &amp;&amp; yr[0] &lt; 0){
+        const span=Math.max(yr[1]-yr[0], 0.000001);
+        fix[&quot;yaxis.range&quot;]=[0, span];
+      }
+
+      if(Object.keys(fix).length){
+        clamping=true;
+        Plotly.relayout(gd,fix).finally(function(){ clamping=false; });
+      }
+    }
+
+    gd.on(&quot;plotly_relayout&quot;, clampNonNegative);
 
     let t=null;
     window.addEventListener(&quot;resize&quot;,function(){
       clearTimeout(t);
-      t=setTimeout(function(){ Plotly.Plots.resize(gd); },120);
+      t=setTimeout(function(){
+        Plotly.Plots.resize(gd);
+      },120);
     },{passive:true});
   },760);
 });
@@ -872,17 +958,8 @@ body&gt;div{width:100%!important;height:100%!important;}
 .plotly-graph-div{touch-action:none!important}
 .modebar{opacity:1!important}
 @media(max-width:700px){
-  .modebar{
-    top:auto!important;
-    bottom:10px!important;
-    right:8px!important;
-    background:rgba(255,255,255,.92)!important;
-    border:1px solid rgba(148,163,184,.30)!important;
-    border-radius:10px!important;
-    padding:2px!important;
-  }
-  .modebar-btn{width:38px!important;height:38px!important;padding:8px!important}
-  .modebar-btn svg{width:21px!important;height:21px!important}
+  /* 모바일에서는 툴바가 제목을 덮지 않도록 완전히 숨김 */
+  .modebar{display:none!important}
 }
 &lt;/style&gt;&lt;/head&gt;
 &lt;body&gt;
@@ -1101,26 +1178,78 @@ window.addEventListener(&quot;load&quot;, function(){
     if(!gd || !window.Plotly) return;
 
     const mobile=window.innerWidth&lt;=700;
+
     if(gd._context){
       gd._context.responsive=true;
-      gd._context.displayModeBar=true;
+      gd._context.displayModeBar=!mobile;
       gd._context.displaylogo=false;
       gd._context.scrollZoom=true;
       gd._context.doubleClick=&quot;reset+autosize&quot;;
     }
 
-    Plotly.relayout(gd,{
+    const relayoutUpdate={
       hovermode:&quot;closest&quot;,
       hoverdistance:mobile?48:30,
       spikedistance:mobile?48:20,
       dragmode:mobile?&quot;pan&quot;:&quot;zoom&quot;,
-      &quot;hoverlabel.font.size&quot;:mobile?14:13
-    });
+      &quot;hoverlabel.font.size&quot;:mobile?14:13,
+
+      /* 자동 범위에서도 0 미만이 나오지 않게 */
+      &quot;xaxis.rangemode&quot;:&quot;nonnegative&quot;,
+      &quot;yaxis.rangemode&quot;:&quot;nonnegative&quot;
+    };
+
+    if(mobile){
+      /* 모바일에서 x축 타이틀이 잘리지 않도록 하단 여백만 확대 */
+      relayoutUpdate[&quot;margin.b&quot;]=108;
+      relayoutUpdate[&quot;margin.t&quot;]=122;
+      relayoutUpdate[&quot;margin.l&quot;]=70;
+      relayoutUpdate[&quot;margin.r&quot;]=24;
+      relayoutUpdate[&quot;xaxis.automargin&quot;]=true;
+      relayoutUpdate[&quot;yaxis.automargin&quot;]=true;
+      relayoutUpdate[&quot;xaxis.title.standoff&quot;]=14;
+      relayoutUpdate[&quot;yaxis.title.standoff&quot;]=12;
+    }
+
+    Plotly.relayout(gd,relayoutUpdate);
+
+    /* 사용자가 드래그/핀치 줌을 해도 x=0, y=0 아래로는 못 내려가게 고정 */
+    let clamping=false;
+
+    function clampNonNegative(){
+      if(clamping || !gd._fullLayout) return;
+
+      const xr=gd._fullLayout.xaxis &amp;&amp; gd._fullLayout.xaxis.range
+        ? gd._fullLayout.xaxis.range.slice() : null;
+      const yr=gd._fullLayout.yaxis &amp;&amp; gd._fullLayout.yaxis.range
+        ? gd._fullLayout.yaxis.range.slice() : null;
+
+      const fix={};
+
+      if(xr &amp;&amp; Number.isFinite(xr[0]) &amp;&amp; Number.isFinite(xr[1]) &amp;&amp; xr[0] &lt; 0){
+        const span=Math.max(xr[1]-xr[0], 0.000001);
+        fix[&quot;xaxis.range&quot;]=[0, span];
+      }
+
+      if(yr &amp;&amp; Number.isFinite(yr[0]) &amp;&amp; Number.isFinite(yr[1]) &amp;&amp; yr[0] &lt; 0){
+        const span=Math.max(yr[1]-yr[0], 0.000001);
+        fix[&quot;yaxis.range&quot;]=[0, span];
+      }
+
+      if(Object.keys(fix).length){
+        clamping=true;
+        Plotly.relayout(gd,fix).finally(function(){ clamping=false; });
+      }
+    }
+
+    gd.on(&quot;plotly_relayout&quot;, clampNonNegative);
 
     let t=null;
     window.addEventListener(&quot;resize&quot;,function(){
       clearTimeout(t);
-      t=setTimeout(function(){ Plotly.Plots.resize(gd); },120);
+      t=setTimeout(function(){
+        Plotly.Plots.resize(gd);
+      },120);
     },{passive:true});
   },760);
 });
@@ -1137,17 +1266,8 @@ body&gt;div{width:100%!important;height:100%!important;}
 .plotly-graph-div{touch-action:none!important}
 .modebar{opacity:1!important}
 @media(max-width:700px){
-  .modebar{
-    top:auto!important;
-    bottom:10px!important;
-    right:8px!important;
-    background:rgba(255,255,255,.92)!important;
-    border:1px solid rgba(148,163,184,.30)!important;
-    border-radius:10px!important;
-    padding:2px!important;
-  }
-  .modebar-btn{width:38px!important;height:38px!important;padding:8px!important}
-  .modebar-btn svg{width:21px!important;height:21px!important}
+  /* 모바일에서는 툴바가 제목을 덮지 않도록 완전히 숨김 */
+  .modebar{display:none!important}
 }
 &lt;/style&gt;&lt;/head&gt;
 &lt;body&gt;
@@ -1366,26 +1486,78 @@ window.addEventListener(&quot;load&quot;, function(){
     if(!gd || !window.Plotly) return;
 
     const mobile=window.innerWidth&lt;=700;
+
     if(gd._context){
       gd._context.responsive=true;
-      gd._context.displayModeBar=true;
+      gd._context.displayModeBar=!mobile;
       gd._context.displaylogo=false;
       gd._context.scrollZoom=true;
       gd._context.doubleClick=&quot;reset+autosize&quot;;
     }
 
-    Plotly.relayout(gd,{
+    const relayoutUpdate={
       hovermode:&quot;closest&quot;,
       hoverdistance:mobile?48:30,
       spikedistance:mobile?48:20,
       dragmode:mobile?&quot;pan&quot;:&quot;zoom&quot;,
-      &quot;hoverlabel.font.size&quot;:mobile?14:13
-    });
+      &quot;hoverlabel.font.size&quot;:mobile?14:13,
+
+      /* 자동 범위에서도 0 미만이 나오지 않게 */
+      &quot;xaxis.rangemode&quot;:&quot;nonnegative&quot;,
+      &quot;yaxis.rangemode&quot;:&quot;nonnegative&quot;
+    };
+
+    if(mobile){
+      /* 모바일에서 x축 타이틀이 잘리지 않도록 하단 여백만 확대 */
+      relayoutUpdate[&quot;margin.b&quot;]=108;
+      relayoutUpdate[&quot;margin.t&quot;]=122;
+      relayoutUpdate[&quot;margin.l&quot;]=70;
+      relayoutUpdate[&quot;margin.r&quot;]=24;
+      relayoutUpdate[&quot;xaxis.automargin&quot;]=true;
+      relayoutUpdate[&quot;yaxis.automargin&quot;]=true;
+      relayoutUpdate[&quot;xaxis.title.standoff&quot;]=14;
+      relayoutUpdate[&quot;yaxis.title.standoff&quot;]=12;
+    }
+
+    Plotly.relayout(gd,relayoutUpdate);
+
+    /* 사용자가 드래그/핀치 줌을 해도 x=0, y=0 아래로는 못 내려가게 고정 */
+    let clamping=false;
+
+    function clampNonNegative(){
+      if(clamping || !gd._fullLayout) return;
+
+      const xr=gd._fullLayout.xaxis &amp;&amp; gd._fullLayout.xaxis.range
+        ? gd._fullLayout.xaxis.range.slice() : null;
+      const yr=gd._fullLayout.yaxis &amp;&amp; gd._fullLayout.yaxis.range
+        ? gd._fullLayout.yaxis.range.slice() : null;
+
+      const fix={};
+
+      if(xr &amp;&amp; Number.isFinite(xr[0]) &amp;&amp; Number.isFinite(xr[1]) &amp;&amp; xr[0] &lt; 0){
+        const span=Math.max(xr[1]-xr[0], 0.000001);
+        fix[&quot;xaxis.range&quot;]=[0, span];
+      }
+
+      if(yr &amp;&amp; Number.isFinite(yr[0]) &amp;&amp; Number.isFinite(yr[1]) &amp;&amp; yr[0] &lt; 0){
+        const span=Math.max(yr[1]-yr[0], 0.000001);
+        fix[&quot;yaxis.range&quot;]=[0, span];
+      }
+
+      if(Object.keys(fix).length){
+        clamping=true;
+        Plotly.relayout(gd,fix).finally(function(){ clamping=false; });
+      }
+    }
+
+    gd.on(&quot;plotly_relayout&quot;, clampNonNegative);
 
     let t=null;
     window.addEventListener(&quot;resize&quot;,function(){
       clearTimeout(t);
-      t=setTimeout(function(){ Plotly.Plots.resize(gd); },120);
+      t=setTimeout(function(){
+        Plotly.Plots.resize(gd);
+      },120);
     },{passive:true});
   },760);
 });
