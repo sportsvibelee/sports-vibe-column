@@ -273,12 +273,12 @@ article section[id]{scroll-margin-top:140px}
     background:#e8edff;color:#3730a3;font-size:14px;font-weight:900;
   }
   .chart-embed{
-    min-height:610px!important;
+    min-height:700px!important;
     overflow:hidden!important;
     border-radius:0 0 14px 14px!important;
   }
   .chart-frame,.chart-embed iframe{
-    height:610px!important;
+    height:700px!important;
     width:100%!important;
     display:block!important;
     touch-action:auto;
@@ -291,7 +291,7 @@ article section[id]{scroll-margin-top:140px}
 }
 @media(max-width:420px){
   .chart-card{margin-left:-14px!important;margin-right:-14px!important}
-  .chart-embed,.chart-frame,.chart-embed iframe{height:590px!important;min-height:590px!important}
+  .chart-embed,.chart-frame,.chart-embed iframe{height:680px!important;min-height:680px!important}
 }
 </style>
 </head>
@@ -340,8 +340,42 @@ body&gt;div{width:100%!important;height:100%!important;}
 .plotly-graph-div{touch-action:none!important}
 .modebar{opacity:1!important}
 @media(max-width:700px){
-  /* 모바일에서는 툴바가 제목을 덮지 않도록 완전히 숨김 */
   .modebar{display:none!important}
+
+  /* 모바일 전용 간편 줌 버튼 */
+  #sv-mobile-zoom-controls{
+    position:absolute;
+    right:10px;
+    bottom:10px;
+    z-index:50;
+    display:flex;
+    gap:6px;
+    padding:5px;
+    border:1px solid rgba(148,163,184,.35);
+    border-radius:12px;
+    background:rgba(255,255,255,.94);
+    box-shadow:0 4px 14px rgba(15,23,42,.10);
+    -webkit-backdrop-filter:blur(6px);
+    backdrop-filter:blur(6px);
+  }
+  #sv-mobile-zoom-controls button{
+    width:42px;
+    height:42px;
+    border:0;
+    border-radius:9px;
+    background:#f1f5f9;
+    color:#17233a;
+    font:800 22px/1 -apple-system,BlinkMacSystemFont,&quot;Pretendard&quot;,sans-serif;
+    touch-action:manipulation;
+    -webkit-tap-highlight-color:transparent;
+  }
+  #sv-mobile-zoom-controls button:active{
+    transform:scale(.96);
+    background:#e2e8f0;
+  }
+  #sv-mobile-zoom-controls .sv-reset{
+    font-size:18px;
+  }
 }
 &lt;/style&gt;&lt;/head&gt;
 &lt;body&gt;
@@ -571,31 +605,125 @@ window.addEventListener(&quot;load&quot;, function(){
 
     const relayoutUpdate={
       hovermode:&quot;closest&quot;,
-      hoverdistance:mobile?48:30,
-      spikedistance:mobile?48:20,
+      hoverdistance:mobile?50:30,
+      spikedistance:mobile?50:20,
       dragmode:mobile?&quot;pan&quot;:&quot;zoom&quot;,
-      &quot;hoverlabel.font.size&quot;:mobile?14:13,
+      &quot;hoverlabel.font.size&quot;:mobile?11:13,
 
-      /* 자동 범위에서도 0 미만이 나오지 않게 */
+      /* 0 아래 음수 영역 진입 방지 유지 */
       &quot;xaxis.rangemode&quot;:&quot;nonnegative&quot;,
       &quot;yaxis.rangemode&quot;:&quot;nonnegative&quot;
     };
 
     if(mobile){
-      /* 모바일에서 x축 타이틀이 잘리지 않도록 하단 여백만 확대 */
-      relayoutUpdate[&quot;margin.b&quot;]=108;
-      relayoutUpdate[&quot;margin.t&quot;]=122;
-      relayoutUpdate[&quot;margin.l&quot;]=70;
-      relayoutUpdate[&quot;margin.r&quot;]=24;
+      /*
+        모바일에서 잘리던 x축 제목/눈금 전용 여백.
+        선수 라벨·평균선·라운드 필터는 건드리지 않음.
+      */
+      relayoutUpdate[&quot;margin.b&quot;]=150;
+      relayoutUpdate[&quot;margin.t&quot;]=118;
+      relayoutUpdate[&quot;margin.l&quot;]=68;
+      relayoutUpdate[&quot;margin.r&quot;]=20;
       relayoutUpdate[&quot;xaxis.automargin&quot;]=true;
       relayoutUpdate[&quot;yaxis.automargin&quot;]=true;
-      relayoutUpdate[&quot;xaxis.title.standoff&quot;]=14;
+      relayoutUpdate[&quot;xaxis.title.standoff&quot;]=20;
       relayoutUpdate[&quot;yaxis.title.standoff&quot;]=12;
+      relayoutUpdate[&quot;xaxis.title.font.size&quot;]=13;
+      relayoutUpdate[&quot;yaxis.title.font.size&quot;]=13;
+      relayoutUpdate[&quot;xaxis.tickfont.size&quot;]=11;
+      relayoutUpdate[&quot;yaxis.tickfont.size&quot;]=11;
     }
 
-    Plotly.relayout(gd,relayoutUpdate);
+    Plotly.relayout(gd,relayoutUpdate).then(function(){
+      if(!mobile) return;
 
-    /* 사용자가 드래그/핀치 줌을 해도 x=0, y=0 아래로는 못 내려가게 고정 */
+      /*
+        모바일에서 평균선 hover 박스가 좌우로 잘리지 않도록
+        '내용은 그대로' 두고 긴 설명만 줄바꿈.
+      */
+      const avgIdx=[];
+      const avgTemplates=[];
+      gd.data.forEach(function(tr,idx){
+        if(tr &amp;&amp; (tr.name===&quot;avg_x_hover&quot; || tr.name===&quot;avg_y_hover&quot;)){
+          avgIdx.push(idx);
+          let t=String(tr.hovertemplate || &quot;&quot;);
+          t=t.replace(
+            &quot;최근 5개년 프로 지명 대학타자의 대학 통산 &quot;,
+            &quot;최근 5개년 프로 지명 대학타자의&lt;br&gt;대학 통산 &quot;
+          );
+          avgTemplates.push(t);
+        }
+      });
+      avgIdx.forEach(function(idx,j){
+        Plotly.restyle(gd,{&quot;hovertemplate&quot;:avgTemplates[j]},[idx]);
+      });
+
+      /* 모바일에서 줌인/줌아웃을 쉽게 쓰는 큰 터치 버튼 추가 */
+      if(!document.getElementById(&quot;sv-mobile-zoom-controls&quot;)){
+        const box=document.createElement(&quot;div&quot;);
+        box.id=&quot;sv-mobile-zoom-controls&quot;;
+        box.setAttribute(&quot;aria-label&quot;,&quot;그래프 확대 축소&quot;);
+
+        const zin=document.createElement(&quot;button&quot;);
+        zin.type=&quot;button&quot;;
+        zin.textContent=&quot;+&quot;;
+        zin.setAttribute(&quot;aria-label&quot;,&quot;확대&quot;);
+
+        const zout=document.createElement(&quot;button&quot;);
+        zout.type=&quot;button&quot;;
+        zout.textContent=&quot;−&quot;;
+        zout.setAttribute(&quot;aria-label&quot;,&quot;축소&quot;);
+
+        const reset=document.createElement(&quot;button&quot;);
+        reset.type=&quot;button&quot;;
+        reset.textContent=&quot;↺&quot;;
+        reset.className=&quot;sv-reset&quot;;
+        reset.setAttribute(&quot;aria-label&quot;,&quot;그래프 초기화&quot;);
+
+        box.appendChild(zin);
+        box.appendChild(zout);
+        box.appendChild(reset);
+        document.body.appendChild(box);
+
+        function zoom(factor){
+          if(!gd._fullLayout) return;
+          const xr=gd._fullLayout.xaxis.range.slice();
+          const yr=gd._fullLayout.yaxis.range.slice();
+
+          const xc=(xr[0]+xr[1])/2;
+          const yc=(yr[0]+yr[1])/2;
+          const xh=(xr[1]-xr[0])*factor/2;
+          const yh=(yr[1]-yr[0])*factor/2;
+
+          let nx0=Math.max(0,xc-xh);
+          let nx1=xc+xh;
+          let ny0=Math.max(0,yc-yh);
+          let ny1=yc+yh;
+
+          /* 0에서 잘린 경우 기존 폭 유지 */
+          if(nx0===0) nx1=Math.max(nx1,(xr[1]-xr[0])*factor);
+          if(ny0===0) ny1=Math.max(ny1,(yr[1]-yr[0])*factor);
+
+          Plotly.relayout(gd,{
+            &quot;xaxis.range&quot;:[nx0,nx1],
+            &quot;yaxis.range&quot;:[ny0,ny1]
+          });
+        }
+
+        zin.addEventListener(&quot;click&quot;,function(){ zoom(.78); });
+        zout.addEventListener(&quot;click&quot;,function(){ zoom(1.28); });
+        reset.addEventListener(&quot;click&quot;,function(){
+          Plotly.relayout(gd,{
+            &quot;xaxis.autorange&quot;:true,
+            &quot;yaxis.autorange&quot;:true,
+            &quot;xaxis.rangemode&quot;:&quot;nonnegative&quot;,
+            &quot;yaxis.rangemode&quot;:&quot;nonnegative&quot;
+          });
+        });
+      }
+    });
+
+    /* 사용자가 드래그/핀치 줌을 해도 x=0, y=0 아래로는 못 내려가게 유지 */
     let clamping=false;
 
     function clampNonNegative(){
@@ -609,22 +737,22 @@ window.addEventListener(&quot;load&quot;, function(){
       const fix={};
 
       if(xr &amp;&amp; Number.isFinite(xr[0]) &amp;&amp; Number.isFinite(xr[1]) &amp;&amp; xr[0] &lt; 0){
-        const span=Math.max(xr[1]-xr[0], 0.000001);
-        fix[&quot;xaxis.range&quot;]=[0, span];
+        const span=Math.max(xr[1]-xr[0],0.000001);
+        fix[&quot;xaxis.range&quot;]=[0,span];
       }
 
       if(yr &amp;&amp; Number.isFinite(yr[0]) &amp;&amp; Number.isFinite(yr[1]) &amp;&amp; yr[0] &lt; 0){
-        const span=Math.max(yr[1]-yr[0], 0.000001);
-        fix[&quot;yaxis.range&quot;]=[0, span];
+        const span=Math.max(yr[1]-yr[0],0.000001);
+        fix[&quot;yaxis.range&quot;]=[0,span];
       }
 
       if(Object.keys(fix).length){
         clamping=true;
-        Plotly.relayout(gd,fix).finally(function(){ clamping=false; });
+        Plotly.relayout(gd,fix).finally(function(){clamping=false;});
       }
     }
 
-    gd.on(&quot;plotly_relayout&quot;, clampNonNegative);
+    gd.on(&quot;plotly_relayout&quot;,clampNonNegative);
 
     let t=null;
     window.addEventListener(&quot;resize&quot;,function(){
@@ -648,8 +776,42 @@ body&gt;div{width:100%!important;height:100%!important;}
 .plotly-graph-div{touch-action:none!important}
 .modebar{opacity:1!important}
 @media(max-width:700px){
-  /* 모바일에서는 툴바가 제목을 덮지 않도록 완전히 숨김 */
   .modebar{display:none!important}
+
+  /* 모바일 전용 간편 줌 버튼 */
+  #sv-mobile-zoom-controls{
+    position:absolute;
+    right:10px;
+    bottom:10px;
+    z-index:50;
+    display:flex;
+    gap:6px;
+    padding:5px;
+    border:1px solid rgba(148,163,184,.35);
+    border-radius:12px;
+    background:rgba(255,255,255,.94);
+    box-shadow:0 4px 14px rgba(15,23,42,.10);
+    -webkit-backdrop-filter:blur(6px);
+    backdrop-filter:blur(6px);
+  }
+  #sv-mobile-zoom-controls button{
+    width:42px;
+    height:42px;
+    border:0;
+    border-radius:9px;
+    background:#f1f5f9;
+    color:#17233a;
+    font:800 22px/1 -apple-system,BlinkMacSystemFont,&quot;Pretendard&quot;,sans-serif;
+    touch-action:manipulation;
+    -webkit-tap-highlight-color:transparent;
+  }
+  #sv-mobile-zoom-controls button:active{
+    transform:scale(.96);
+    background:#e2e8f0;
+  }
+  #sv-mobile-zoom-controls .sv-reset{
+    font-size:18px;
+  }
 }
 &lt;/style&gt;&lt;/head&gt;
 &lt;body&gt;
@@ -879,31 +1041,125 @@ window.addEventListener(&quot;load&quot;, function(){
 
     const relayoutUpdate={
       hovermode:&quot;closest&quot;,
-      hoverdistance:mobile?48:30,
-      spikedistance:mobile?48:20,
+      hoverdistance:mobile?50:30,
+      spikedistance:mobile?50:20,
       dragmode:mobile?&quot;pan&quot;:&quot;zoom&quot;,
-      &quot;hoverlabel.font.size&quot;:mobile?14:13,
+      &quot;hoverlabel.font.size&quot;:mobile?11:13,
 
-      /* 자동 범위에서도 0 미만이 나오지 않게 */
+      /* 0 아래 음수 영역 진입 방지 유지 */
       &quot;xaxis.rangemode&quot;:&quot;nonnegative&quot;,
       &quot;yaxis.rangemode&quot;:&quot;nonnegative&quot;
     };
 
     if(mobile){
-      /* 모바일에서 x축 타이틀이 잘리지 않도록 하단 여백만 확대 */
-      relayoutUpdate[&quot;margin.b&quot;]=108;
-      relayoutUpdate[&quot;margin.t&quot;]=122;
-      relayoutUpdate[&quot;margin.l&quot;]=70;
-      relayoutUpdate[&quot;margin.r&quot;]=24;
+      /*
+        모바일에서 잘리던 x축 제목/눈금 전용 여백.
+        선수 라벨·평균선·라운드 필터는 건드리지 않음.
+      */
+      relayoutUpdate[&quot;margin.b&quot;]=150;
+      relayoutUpdate[&quot;margin.t&quot;]=118;
+      relayoutUpdate[&quot;margin.l&quot;]=68;
+      relayoutUpdate[&quot;margin.r&quot;]=20;
       relayoutUpdate[&quot;xaxis.automargin&quot;]=true;
       relayoutUpdate[&quot;yaxis.automargin&quot;]=true;
-      relayoutUpdate[&quot;xaxis.title.standoff&quot;]=14;
+      relayoutUpdate[&quot;xaxis.title.standoff&quot;]=20;
       relayoutUpdate[&quot;yaxis.title.standoff&quot;]=12;
+      relayoutUpdate[&quot;xaxis.title.font.size&quot;]=13;
+      relayoutUpdate[&quot;yaxis.title.font.size&quot;]=13;
+      relayoutUpdate[&quot;xaxis.tickfont.size&quot;]=11;
+      relayoutUpdate[&quot;yaxis.tickfont.size&quot;]=11;
     }
 
-    Plotly.relayout(gd,relayoutUpdate);
+    Plotly.relayout(gd,relayoutUpdate).then(function(){
+      if(!mobile) return;
 
-    /* 사용자가 드래그/핀치 줌을 해도 x=0, y=0 아래로는 못 내려가게 고정 */
+      /*
+        모바일에서 평균선 hover 박스가 좌우로 잘리지 않도록
+        '내용은 그대로' 두고 긴 설명만 줄바꿈.
+      */
+      const avgIdx=[];
+      const avgTemplates=[];
+      gd.data.forEach(function(tr,idx){
+        if(tr &amp;&amp; (tr.name===&quot;avg_x_hover&quot; || tr.name===&quot;avg_y_hover&quot;)){
+          avgIdx.push(idx);
+          let t=String(tr.hovertemplate || &quot;&quot;);
+          t=t.replace(
+            &quot;최근 5개년 프로 지명 대학타자의 대학 통산 &quot;,
+            &quot;최근 5개년 프로 지명 대학타자의&lt;br&gt;대학 통산 &quot;
+          );
+          avgTemplates.push(t);
+        }
+      });
+      avgIdx.forEach(function(idx,j){
+        Plotly.restyle(gd,{&quot;hovertemplate&quot;:avgTemplates[j]},[idx]);
+      });
+
+      /* 모바일에서 줌인/줌아웃을 쉽게 쓰는 큰 터치 버튼 추가 */
+      if(!document.getElementById(&quot;sv-mobile-zoom-controls&quot;)){
+        const box=document.createElement(&quot;div&quot;);
+        box.id=&quot;sv-mobile-zoom-controls&quot;;
+        box.setAttribute(&quot;aria-label&quot;,&quot;그래프 확대 축소&quot;);
+
+        const zin=document.createElement(&quot;button&quot;);
+        zin.type=&quot;button&quot;;
+        zin.textContent=&quot;+&quot;;
+        zin.setAttribute(&quot;aria-label&quot;,&quot;확대&quot;);
+
+        const zout=document.createElement(&quot;button&quot;);
+        zout.type=&quot;button&quot;;
+        zout.textContent=&quot;−&quot;;
+        zout.setAttribute(&quot;aria-label&quot;,&quot;축소&quot;);
+
+        const reset=document.createElement(&quot;button&quot;);
+        reset.type=&quot;button&quot;;
+        reset.textContent=&quot;↺&quot;;
+        reset.className=&quot;sv-reset&quot;;
+        reset.setAttribute(&quot;aria-label&quot;,&quot;그래프 초기화&quot;);
+
+        box.appendChild(zin);
+        box.appendChild(zout);
+        box.appendChild(reset);
+        document.body.appendChild(box);
+
+        function zoom(factor){
+          if(!gd._fullLayout) return;
+          const xr=gd._fullLayout.xaxis.range.slice();
+          const yr=gd._fullLayout.yaxis.range.slice();
+
+          const xc=(xr[0]+xr[1])/2;
+          const yc=(yr[0]+yr[1])/2;
+          const xh=(xr[1]-xr[0])*factor/2;
+          const yh=(yr[1]-yr[0])*factor/2;
+
+          let nx0=Math.max(0,xc-xh);
+          let nx1=xc+xh;
+          let ny0=Math.max(0,yc-yh);
+          let ny1=yc+yh;
+
+          /* 0에서 잘린 경우 기존 폭 유지 */
+          if(nx0===0) nx1=Math.max(nx1,(xr[1]-xr[0])*factor);
+          if(ny0===0) ny1=Math.max(ny1,(yr[1]-yr[0])*factor);
+
+          Plotly.relayout(gd,{
+            &quot;xaxis.range&quot;:[nx0,nx1],
+            &quot;yaxis.range&quot;:[ny0,ny1]
+          });
+        }
+
+        zin.addEventListener(&quot;click&quot;,function(){ zoom(.78); });
+        zout.addEventListener(&quot;click&quot;,function(){ zoom(1.28); });
+        reset.addEventListener(&quot;click&quot;,function(){
+          Plotly.relayout(gd,{
+            &quot;xaxis.autorange&quot;:true,
+            &quot;yaxis.autorange&quot;:true,
+            &quot;xaxis.rangemode&quot;:&quot;nonnegative&quot;,
+            &quot;yaxis.rangemode&quot;:&quot;nonnegative&quot;
+          });
+        });
+      }
+    });
+
+    /* 사용자가 드래그/핀치 줌을 해도 x=0, y=0 아래로는 못 내려가게 유지 */
     let clamping=false;
 
     function clampNonNegative(){
@@ -917,22 +1173,22 @@ window.addEventListener(&quot;load&quot;, function(){
       const fix={};
 
       if(xr &amp;&amp; Number.isFinite(xr[0]) &amp;&amp; Number.isFinite(xr[1]) &amp;&amp; xr[0] &lt; 0){
-        const span=Math.max(xr[1]-xr[0], 0.000001);
-        fix[&quot;xaxis.range&quot;]=[0, span];
+        const span=Math.max(xr[1]-xr[0],0.000001);
+        fix[&quot;xaxis.range&quot;]=[0,span];
       }
 
       if(yr &amp;&amp; Number.isFinite(yr[0]) &amp;&amp; Number.isFinite(yr[1]) &amp;&amp; yr[0] &lt; 0){
-        const span=Math.max(yr[1]-yr[0], 0.000001);
-        fix[&quot;yaxis.range&quot;]=[0, span];
+        const span=Math.max(yr[1]-yr[0],0.000001);
+        fix[&quot;yaxis.range&quot;]=[0,span];
       }
 
       if(Object.keys(fix).length){
         clamping=true;
-        Plotly.relayout(gd,fix).finally(function(){ clamping=false; });
+        Plotly.relayout(gd,fix).finally(function(){clamping=false;});
       }
     }
 
-    gd.on(&quot;plotly_relayout&quot;, clampNonNegative);
+    gd.on(&quot;plotly_relayout&quot;,clampNonNegative);
 
     let t=null;
     window.addEventListener(&quot;resize&quot;,function(){
@@ -958,8 +1214,42 @@ body&gt;div{width:100%!important;height:100%!important;}
 .plotly-graph-div{touch-action:none!important}
 .modebar{opacity:1!important}
 @media(max-width:700px){
-  /* 모바일에서는 툴바가 제목을 덮지 않도록 완전히 숨김 */
   .modebar{display:none!important}
+
+  /* 모바일 전용 간편 줌 버튼 */
+  #sv-mobile-zoom-controls{
+    position:absolute;
+    right:10px;
+    bottom:10px;
+    z-index:50;
+    display:flex;
+    gap:6px;
+    padding:5px;
+    border:1px solid rgba(148,163,184,.35);
+    border-radius:12px;
+    background:rgba(255,255,255,.94);
+    box-shadow:0 4px 14px rgba(15,23,42,.10);
+    -webkit-backdrop-filter:blur(6px);
+    backdrop-filter:blur(6px);
+  }
+  #sv-mobile-zoom-controls button{
+    width:42px;
+    height:42px;
+    border:0;
+    border-radius:9px;
+    background:#f1f5f9;
+    color:#17233a;
+    font:800 22px/1 -apple-system,BlinkMacSystemFont,&quot;Pretendard&quot;,sans-serif;
+    touch-action:manipulation;
+    -webkit-tap-highlight-color:transparent;
+  }
+  #sv-mobile-zoom-controls button:active{
+    transform:scale(.96);
+    background:#e2e8f0;
+  }
+  #sv-mobile-zoom-controls .sv-reset{
+    font-size:18px;
+  }
 }
 &lt;/style&gt;&lt;/head&gt;
 &lt;body&gt;
@@ -1189,31 +1479,125 @@ window.addEventListener(&quot;load&quot;, function(){
 
     const relayoutUpdate={
       hovermode:&quot;closest&quot;,
-      hoverdistance:mobile?48:30,
-      spikedistance:mobile?48:20,
+      hoverdistance:mobile?50:30,
+      spikedistance:mobile?50:20,
       dragmode:mobile?&quot;pan&quot;:&quot;zoom&quot;,
-      &quot;hoverlabel.font.size&quot;:mobile?14:13,
+      &quot;hoverlabel.font.size&quot;:mobile?11:13,
 
-      /* 자동 범위에서도 0 미만이 나오지 않게 */
+      /* 0 아래 음수 영역 진입 방지 유지 */
       &quot;xaxis.rangemode&quot;:&quot;nonnegative&quot;,
       &quot;yaxis.rangemode&quot;:&quot;nonnegative&quot;
     };
 
     if(mobile){
-      /* 모바일에서 x축 타이틀이 잘리지 않도록 하단 여백만 확대 */
-      relayoutUpdate[&quot;margin.b&quot;]=108;
-      relayoutUpdate[&quot;margin.t&quot;]=122;
-      relayoutUpdate[&quot;margin.l&quot;]=70;
-      relayoutUpdate[&quot;margin.r&quot;]=24;
+      /*
+        모바일에서 잘리던 x축 제목/눈금 전용 여백.
+        선수 라벨·평균선·라운드 필터는 건드리지 않음.
+      */
+      relayoutUpdate[&quot;margin.b&quot;]=150;
+      relayoutUpdate[&quot;margin.t&quot;]=118;
+      relayoutUpdate[&quot;margin.l&quot;]=68;
+      relayoutUpdate[&quot;margin.r&quot;]=20;
       relayoutUpdate[&quot;xaxis.automargin&quot;]=true;
       relayoutUpdate[&quot;yaxis.automargin&quot;]=true;
-      relayoutUpdate[&quot;xaxis.title.standoff&quot;]=14;
+      relayoutUpdate[&quot;xaxis.title.standoff&quot;]=20;
       relayoutUpdate[&quot;yaxis.title.standoff&quot;]=12;
+      relayoutUpdate[&quot;xaxis.title.font.size&quot;]=13;
+      relayoutUpdate[&quot;yaxis.title.font.size&quot;]=13;
+      relayoutUpdate[&quot;xaxis.tickfont.size&quot;]=11;
+      relayoutUpdate[&quot;yaxis.tickfont.size&quot;]=11;
     }
 
-    Plotly.relayout(gd,relayoutUpdate);
+    Plotly.relayout(gd,relayoutUpdate).then(function(){
+      if(!mobile) return;
 
-    /* 사용자가 드래그/핀치 줌을 해도 x=0, y=0 아래로는 못 내려가게 고정 */
+      /*
+        모바일에서 평균선 hover 박스가 좌우로 잘리지 않도록
+        '내용은 그대로' 두고 긴 설명만 줄바꿈.
+      */
+      const avgIdx=[];
+      const avgTemplates=[];
+      gd.data.forEach(function(tr,idx){
+        if(tr &amp;&amp; (tr.name===&quot;avg_x_hover&quot; || tr.name===&quot;avg_y_hover&quot;)){
+          avgIdx.push(idx);
+          let t=String(tr.hovertemplate || &quot;&quot;);
+          t=t.replace(
+            &quot;최근 5개년 프로 지명 대학타자의 대학 통산 &quot;,
+            &quot;최근 5개년 프로 지명 대학타자의&lt;br&gt;대학 통산 &quot;
+          );
+          avgTemplates.push(t);
+        }
+      });
+      avgIdx.forEach(function(idx,j){
+        Plotly.restyle(gd,{&quot;hovertemplate&quot;:avgTemplates[j]},[idx]);
+      });
+
+      /* 모바일에서 줌인/줌아웃을 쉽게 쓰는 큰 터치 버튼 추가 */
+      if(!document.getElementById(&quot;sv-mobile-zoom-controls&quot;)){
+        const box=document.createElement(&quot;div&quot;);
+        box.id=&quot;sv-mobile-zoom-controls&quot;;
+        box.setAttribute(&quot;aria-label&quot;,&quot;그래프 확대 축소&quot;);
+
+        const zin=document.createElement(&quot;button&quot;);
+        zin.type=&quot;button&quot;;
+        zin.textContent=&quot;+&quot;;
+        zin.setAttribute(&quot;aria-label&quot;,&quot;확대&quot;);
+
+        const zout=document.createElement(&quot;button&quot;);
+        zout.type=&quot;button&quot;;
+        zout.textContent=&quot;−&quot;;
+        zout.setAttribute(&quot;aria-label&quot;,&quot;축소&quot;);
+
+        const reset=document.createElement(&quot;button&quot;);
+        reset.type=&quot;button&quot;;
+        reset.textContent=&quot;↺&quot;;
+        reset.className=&quot;sv-reset&quot;;
+        reset.setAttribute(&quot;aria-label&quot;,&quot;그래프 초기화&quot;);
+
+        box.appendChild(zin);
+        box.appendChild(zout);
+        box.appendChild(reset);
+        document.body.appendChild(box);
+
+        function zoom(factor){
+          if(!gd._fullLayout) return;
+          const xr=gd._fullLayout.xaxis.range.slice();
+          const yr=gd._fullLayout.yaxis.range.slice();
+
+          const xc=(xr[0]+xr[1])/2;
+          const yc=(yr[0]+yr[1])/2;
+          const xh=(xr[1]-xr[0])*factor/2;
+          const yh=(yr[1]-yr[0])*factor/2;
+
+          let nx0=Math.max(0,xc-xh);
+          let nx1=xc+xh;
+          let ny0=Math.max(0,yc-yh);
+          let ny1=yc+yh;
+
+          /* 0에서 잘린 경우 기존 폭 유지 */
+          if(nx0===0) nx1=Math.max(nx1,(xr[1]-xr[0])*factor);
+          if(ny0===0) ny1=Math.max(ny1,(yr[1]-yr[0])*factor);
+
+          Plotly.relayout(gd,{
+            &quot;xaxis.range&quot;:[nx0,nx1],
+            &quot;yaxis.range&quot;:[ny0,ny1]
+          });
+        }
+
+        zin.addEventListener(&quot;click&quot;,function(){ zoom(.78); });
+        zout.addEventListener(&quot;click&quot;,function(){ zoom(1.28); });
+        reset.addEventListener(&quot;click&quot;,function(){
+          Plotly.relayout(gd,{
+            &quot;xaxis.autorange&quot;:true,
+            &quot;yaxis.autorange&quot;:true,
+            &quot;xaxis.rangemode&quot;:&quot;nonnegative&quot;,
+            &quot;yaxis.rangemode&quot;:&quot;nonnegative&quot;
+          });
+        });
+      }
+    });
+
+    /* 사용자가 드래그/핀치 줌을 해도 x=0, y=0 아래로는 못 내려가게 유지 */
     let clamping=false;
 
     function clampNonNegative(){
@@ -1227,22 +1611,22 @@ window.addEventListener(&quot;load&quot;, function(){
       const fix={};
 
       if(xr &amp;&amp; Number.isFinite(xr[0]) &amp;&amp; Number.isFinite(xr[1]) &amp;&amp; xr[0] &lt; 0){
-        const span=Math.max(xr[1]-xr[0], 0.000001);
-        fix[&quot;xaxis.range&quot;]=[0, span];
+        const span=Math.max(xr[1]-xr[0],0.000001);
+        fix[&quot;xaxis.range&quot;]=[0,span];
       }
 
       if(yr &amp;&amp; Number.isFinite(yr[0]) &amp;&amp; Number.isFinite(yr[1]) &amp;&amp; yr[0] &lt; 0){
-        const span=Math.max(yr[1]-yr[0], 0.000001);
-        fix[&quot;yaxis.range&quot;]=[0, span];
+        const span=Math.max(yr[1]-yr[0],0.000001);
+        fix[&quot;yaxis.range&quot;]=[0,span];
       }
 
       if(Object.keys(fix).length){
         clamping=true;
-        Plotly.relayout(gd,fix).finally(function(){ clamping=false; });
+        Plotly.relayout(gd,fix).finally(function(){clamping=false;});
       }
     }
 
-    gd.on(&quot;plotly_relayout&quot;, clampNonNegative);
+    gd.on(&quot;plotly_relayout&quot;,clampNonNegative);
 
     let t=null;
     window.addEventListener(&quot;resize&quot;,function(){
@@ -1266,8 +1650,42 @@ body&gt;div{width:100%!important;height:100%!important;}
 .plotly-graph-div{touch-action:none!important}
 .modebar{opacity:1!important}
 @media(max-width:700px){
-  /* 모바일에서는 툴바가 제목을 덮지 않도록 완전히 숨김 */
   .modebar{display:none!important}
+
+  /* 모바일 전용 간편 줌 버튼 */
+  #sv-mobile-zoom-controls{
+    position:absolute;
+    right:10px;
+    bottom:10px;
+    z-index:50;
+    display:flex;
+    gap:6px;
+    padding:5px;
+    border:1px solid rgba(148,163,184,.35);
+    border-radius:12px;
+    background:rgba(255,255,255,.94);
+    box-shadow:0 4px 14px rgba(15,23,42,.10);
+    -webkit-backdrop-filter:blur(6px);
+    backdrop-filter:blur(6px);
+  }
+  #sv-mobile-zoom-controls button{
+    width:42px;
+    height:42px;
+    border:0;
+    border-radius:9px;
+    background:#f1f5f9;
+    color:#17233a;
+    font:800 22px/1 -apple-system,BlinkMacSystemFont,&quot;Pretendard&quot;,sans-serif;
+    touch-action:manipulation;
+    -webkit-tap-highlight-color:transparent;
+  }
+  #sv-mobile-zoom-controls button:active{
+    transform:scale(.96);
+    background:#e2e8f0;
+  }
+  #sv-mobile-zoom-controls .sv-reset{
+    font-size:18px;
+  }
 }
 &lt;/style&gt;&lt;/head&gt;
 &lt;body&gt;
@@ -1497,31 +1915,125 @@ window.addEventListener(&quot;load&quot;, function(){
 
     const relayoutUpdate={
       hovermode:&quot;closest&quot;,
-      hoverdistance:mobile?48:30,
-      spikedistance:mobile?48:20,
+      hoverdistance:mobile?50:30,
+      spikedistance:mobile?50:20,
       dragmode:mobile?&quot;pan&quot;:&quot;zoom&quot;,
-      &quot;hoverlabel.font.size&quot;:mobile?14:13,
+      &quot;hoverlabel.font.size&quot;:mobile?11:13,
 
-      /* 자동 범위에서도 0 미만이 나오지 않게 */
+      /* 0 아래 음수 영역 진입 방지 유지 */
       &quot;xaxis.rangemode&quot;:&quot;nonnegative&quot;,
       &quot;yaxis.rangemode&quot;:&quot;nonnegative&quot;
     };
 
     if(mobile){
-      /* 모바일에서 x축 타이틀이 잘리지 않도록 하단 여백만 확대 */
-      relayoutUpdate[&quot;margin.b&quot;]=108;
-      relayoutUpdate[&quot;margin.t&quot;]=122;
-      relayoutUpdate[&quot;margin.l&quot;]=70;
-      relayoutUpdate[&quot;margin.r&quot;]=24;
+      /*
+        모바일에서 잘리던 x축 제목/눈금 전용 여백.
+        선수 라벨·평균선·라운드 필터는 건드리지 않음.
+      */
+      relayoutUpdate[&quot;margin.b&quot;]=150;
+      relayoutUpdate[&quot;margin.t&quot;]=118;
+      relayoutUpdate[&quot;margin.l&quot;]=68;
+      relayoutUpdate[&quot;margin.r&quot;]=20;
       relayoutUpdate[&quot;xaxis.automargin&quot;]=true;
       relayoutUpdate[&quot;yaxis.automargin&quot;]=true;
-      relayoutUpdate[&quot;xaxis.title.standoff&quot;]=14;
+      relayoutUpdate[&quot;xaxis.title.standoff&quot;]=20;
       relayoutUpdate[&quot;yaxis.title.standoff&quot;]=12;
+      relayoutUpdate[&quot;xaxis.title.font.size&quot;]=13;
+      relayoutUpdate[&quot;yaxis.title.font.size&quot;]=13;
+      relayoutUpdate[&quot;xaxis.tickfont.size&quot;]=11;
+      relayoutUpdate[&quot;yaxis.tickfont.size&quot;]=11;
     }
 
-    Plotly.relayout(gd,relayoutUpdate);
+    Plotly.relayout(gd,relayoutUpdate).then(function(){
+      if(!mobile) return;
 
-    /* 사용자가 드래그/핀치 줌을 해도 x=0, y=0 아래로는 못 내려가게 고정 */
+      /*
+        모바일에서 평균선 hover 박스가 좌우로 잘리지 않도록
+        '내용은 그대로' 두고 긴 설명만 줄바꿈.
+      */
+      const avgIdx=[];
+      const avgTemplates=[];
+      gd.data.forEach(function(tr,idx){
+        if(tr &amp;&amp; (tr.name===&quot;avg_x_hover&quot; || tr.name===&quot;avg_y_hover&quot;)){
+          avgIdx.push(idx);
+          let t=String(tr.hovertemplate || &quot;&quot;);
+          t=t.replace(
+            &quot;최근 5개년 프로 지명 대학타자의 대학 통산 &quot;,
+            &quot;최근 5개년 프로 지명 대학타자의&lt;br&gt;대학 통산 &quot;
+          );
+          avgTemplates.push(t);
+        }
+      });
+      avgIdx.forEach(function(idx,j){
+        Plotly.restyle(gd,{&quot;hovertemplate&quot;:avgTemplates[j]},[idx]);
+      });
+
+      /* 모바일에서 줌인/줌아웃을 쉽게 쓰는 큰 터치 버튼 추가 */
+      if(!document.getElementById(&quot;sv-mobile-zoom-controls&quot;)){
+        const box=document.createElement(&quot;div&quot;);
+        box.id=&quot;sv-mobile-zoom-controls&quot;;
+        box.setAttribute(&quot;aria-label&quot;,&quot;그래프 확대 축소&quot;);
+
+        const zin=document.createElement(&quot;button&quot;);
+        zin.type=&quot;button&quot;;
+        zin.textContent=&quot;+&quot;;
+        zin.setAttribute(&quot;aria-label&quot;,&quot;확대&quot;);
+
+        const zout=document.createElement(&quot;button&quot;);
+        zout.type=&quot;button&quot;;
+        zout.textContent=&quot;−&quot;;
+        zout.setAttribute(&quot;aria-label&quot;,&quot;축소&quot;);
+
+        const reset=document.createElement(&quot;button&quot;);
+        reset.type=&quot;button&quot;;
+        reset.textContent=&quot;↺&quot;;
+        reset.className=&quot;sv-reset&quot;;
+        reset.setAttribute(&quot;aria-label&quot;,&quot;그래프 초기화&quot;);
+
+        box.appendChild(zin);
+        box.appendChild(zout);
+        box.appendChild(reset);
+        document.body.appendChild(box);
+
+        function zoom(factor){
+          if(!gd._fullLayout) return;
+          const xr=gd._fullLayout.xaxis.range.slice();
+          const yr=gd._fullLayout.yaxis.range.slice();
+
+          const xc=(xr[0]+xr[1])/2;
+          const yc=(yr[0]+yr[1])/2;
+          const xh=(xr[1]-xr[0])*factor/2;
+          const yh=(yr[1]-yr[0])*factor/2;
+
+          let nx0=Math.max(0,xc-xh);
+          let nx1=xc+xh;
+          let ny0=Math.max(0,yc-yh);
+          let ny1=yc+yh;
+
+          /* 0에서 잘린 경우 기존 폭 유지 */
+          if(nx0===0) nx1=Math.max(nx1,(xr[1]-xr[0])*factor);
+          if(ny0===0) ny1=Math.max(ny1,(yr[1]-yr[0])*factor);
+
+          Plotly.relayout(gd,{
+            &quot;xaxis.range&quot;:[nx0,nx1],
+            &quot;yaxis.range&quot;:[ny0,ny1]
+          });
+        }
+
+        zin.addEventListener(&quot;click&quot;,function(){ zoom(.78); });
+        zout.addEventListener(&quot;click&quot;,function(){ zoom(1.28); });
+        reset.addEventListener(&quot;click&quot;,function(){
+          Plotly.relayout(gd,{
+            &quot;xaxis.autorange&quot;:true,
+            &quot;yaxis.autorange&quot;:true,
+            &quot;xaxis.rangemode&quot;:&quot;nonnegative&quot;,
+            &quot;yaxis.rangemode&quot;:&quot;nonnegative&quot;
+          });
+        });
+      }
+    });
+
+    /* 사용자가 드래그/핀치 줌을 해도 x=0, y=0 아래로는 못 내려가게 유지 */
     let clamping=false;
 
     function clampNonNegative(){
@@ -1535,22 +2047,22 @@ window.addEventListener(&quot;load&quot;, function(){
       const fix={};
 
       if(xr &amp;&amp; Number.isFinite(xr[0]) &amp;&amp; Number.isFinite(xr[1]) &amp;&amp; xr[0] &lt; 0){
-        const span=Math.max(xr[1]-xr[0], 0.000001);
-        fix[&quot;xaxis.range&quot;]=[0, span];
+        const span=Math.max(xr[1]-xr[0],0.000001);
+        fix[&quot;xaxis.range&quot;]=[0,span];
       }
 
       if(yr &amp;&amp; Number.isFinite(yr[0]) &amp;&amp; Number.isFinite(yr[1]) &amp;&amp; yr[0] &lt; 0){
-        const span=Math.max(yr[1]-yr[0], 0.000001);
-        fix[&quot;yaxis.range&quot;]=[0, span];
+        const span=Math.max(yr[1]-yr[0],0.000001);
+        fix[&quot;yaxis.range&quot;]=[0,span];
       }
 
       if(Object.keys(fix).length){
         clamping=true;
-        Plotly.relayout(gd,fix).finally(function(){ clamping=false; });
+        Plotly.relayout(gd,fix).finally(function(){clamping=false;});
       }
     }
 
-    gd.on(&quot;plotly_relayout&quot;, clampNonNegative);
+    gd.on(&quot;plotly_relayout&quot;,clampNonNegative);
 
     let t=null;
     window.addEventListener(&quot;resize&quot;,function(){
