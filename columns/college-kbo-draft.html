@@ -273,12 +273,12 @@ article section[id]{scroll-margin-top:140px}
     background:#e8edff;color:#3730a3;font-size:14px;font-weight:900;
   }
   .chart-embed{
-    min-height:620px!important;
+    min-height:600px!important;
     overflow:hidden!important;
     border-radius:0 0 14px 14px!important;
   }
   .chart-frame,.chart-embed iframe{
-    height:620px!important;
+    height:600px!important;
     width:100%!important;
     display:block!important;
     touch-action:auto;
@@ -471,7 +471,7 @@ window.addEventListener(&quot;load&quot;,function(){
     const gd=document.querySelector(&quot;.plotly-graph-div&quot;);
     if(!gd || !window.Plotly || window.innerWidth&gt;700) return;
 
-    const mobileHeight = window.innerWidth&lt;=420 ? 600 : 620;
+    const mobileHeight = 600;
 
     Plotly.relayout(gd,{
       height:mobileHeight,
@@ -480,15 +480,15 @@ window.addEventListener(&quot;load&quot;,function(){
       hoverdistance:52,
       spikedistance:52,
 
-      &quot;margin.t&quot;:128,
-      &quot;margin.b&quot;:82,
-      &quot;margin.l&quot;:64,
-      &quot;margin.r&quot;:16,
+      &quot;margin.t&quot;:105,
+      &quot;margin.b&quot;:55,
+      &quot;margin.l&quot;:58,
+      &quot;margin.r&quot;:12,
 
       &quot;xaxis.automargin&quot;:true,
       &quot;yaxis.automargin&quot;:true,
-      &quot;xaxis.title.standoff&quot;:12,
-      &quot;yaxis.title.standoff&quot;:8,
+      &quot;xaxis.title.standoff&quot;:9,
+      &quot;yaxis.title.standoff&quot;:7,
       &quot;xaxis.tickfont.size&quot;:11,
       &quot;yaxis.tickfont.size&quot;:11,
       &quot;xaxis.title.font.size&quot;:13,
@@ -499,12 +499,17 @@ window.addEventListener(&quot;load&quot;,function(){
       &quot;xaxis.minallowed&quot;:0,
       &quot;yaxis.minallowed&quot;:0,
 
+      &quot;legend.font.size&quot;:10,
+      &quot;legend.y&quot;:1.015,
+
       &quot;title.text&quot;:`&lt;b&gt;프로 지명 대학타자의&lt;br&gt;공격 생산력과 장타력&lt;/b&gt;&lt;br&gt;&lt;span style='font-size:11px;color:#64748b'&gt;점 크기 = 대학 통산 타수 · 점을 터치하면 선수 정보를 볼 수 있습니다&lt;/span&gt;`,
-      &quot;title.font.size&quot;:16,
+      &quot;title.font.size&quot;:15,
       &quot;title.x&quot;:0.02,
       &quot;title.xanchor&quot;:&quot;left&quot;,
-      &quot;title.y&quot;:0.955,
-      &quot;title.yanchor&quot;:&quot;top&quot;
+      &quot;title.y&quot;:0.94,
+      &quot;title.yanchor&quot;:&quot;top&quot;,
+      &quot;title.pad.t&quot;:6,
+      &quot;title.pad.b&quot;:4
     }).then(function(){
       Plotly.Plots.resize(gd);
     });
@@ -655,7 +660,7 @@ window.addEventListener(&quot;load&quot;,function(){
     const gd=document.querySelector(&quot;.plotly-graph-div&quot;);
     if(!gd || !window.Plotly || window.innerWidth&gt;700) return;
 
-    const mobileHeight = window.innerWidth&lt;=420 ? 600 : 620;
+    const mobileHeight = 600;
 
     Plotly.relayout(gd,{
       height:mobileHeight,
@@ -664,15 +669,15 @@ window.addEventListener(&quot;load&quot;,function(){
       hoverdistance:52,
       spikedistance:52,
 
-      &quot;margin.t&quot;:128,
-      &quot;margin.b&quot;:82,
-      &quot;margin.l&quot;:64,
-      &quot;margin.r&quot;:16,
+      &quot;margin.t&quot;:105,
+      &quot;margin.b&quot;:55,
+      &quot;margin.l&quot;:58,
+      &quot;margin.r&quot;:12,
 
       &quot;xaxis.automargin&quot;:true,
       &quot;yaxis.automargin&quot;:true,
-      &quot;xaxis.title.standoff&quot;:12,
-      &quot;yaxis.title.standoff&quot;:8,
+      &quot;xaxis.title.standoff&quot;:9,
+      &quot;yaxis.title.standoff&quot;:7,
       &quot;xaxis.tickfont.size&quot;:11,
       &quot;yaxis.tickfont.size&quot;:11,
       &quot;xaxis.title.font.size&quot;:13,
@@ -683,12 +688,17 @@ window.addEventListener(&quot;load&quot;,function(){
       &quot;xaxis.minallowed&quot;:0,
       &quot;yaxis.minallowed&quot;:0,
 
+      &quot;legend.font.size&quot;:10,
+      &quot;legend.y&quot;:1.015,
+
       &quot;title.text&quot;:`&lt;b&gt;프로 지명 대학타자의&lt;br&gt;볼넷·삼진 성향&lt;/b&gt;&lt;br&gt;&lt;span style='font-size:11px;color:#64748b'&gt;오른쪽 아래일수록 볼넷 대비 삼진 관리가 좋은 편&lt;/span&gt;`,
-      &quot;title.font.size&quot;:16,
+      &quot;title.font.size&quot;:15,
       &quot;title.x&quot;:0.02,
       &quot;title.xanchor&quot;:&quot;left&quot;,
-      &quot;title.y&quot;:0.955,
-      &quot;title.yanchor&quot;:&quot;top&quot;
+      &quot;title.y&quot;:0.94,
+      &quot;title.yanchor&quot;:&quot;top&quot;,
+      &quot;title.pad.t&quot;:6,
+      &quot;title.pad.b&quot;:4
     }).then(function(){
       Plotly.Plots.resize(gd);
     });
@@ -841,7 +851,7 @@ window.addEventListener(&quot;load&quot;,function(){
     const gd=document.querySelector(&quot;.plotly-graph-div&quot;);
     if(!gd || !window.Plotly || window.innerWidth&gt;700) return;
 
-    const mobileHeight = window.innerWidth&lt;=420 ? 600 : 620;
+    const mobileHeight = 600;
 
     Plotly.relayout(gd,{
       height:mobileHeight,
@@ -850,15 +860,15 @@ window.addEventListener(&quot;load&quot;,function(){
       hoverdistance:52,
       spikedistance:52,
 
-      &quot;margin.t&quot;:128,
-      &quot;margin.b&quot;:82,
-      &quot;margin.l&quot;:64,
-      &quot;margin.r&quot;:16,
+      &quot;margin.t&quot;:105,
+      &quot;margin.b&quot;:55,
+      &quot;margin.l&quot;:58,
+      &quot;margin.r&quot;:12,
 
       &quot;xaxis.automargin&quot;:true,
       &quot;yaxis.automargin&quot;:true,
-      &quot;xaxis.title.standoff&quot;:12,
-      &quot;yaxis.title.standoff&quot;:8,
+      &quot;xaxis.title.standoff&quot;:9,
+      &quot;yaxis.title.standoff&quot;:7,
       &quot;xaxis.tickfont.size&quot;:11,
       &quot;yaxis.tickfont.size&quot;:11,
       &quot;xaxis.title.font.size&quot;:13,
@@ -869,12 +879,17 @@ window.addEventListener(&quot;load&quot;,function(){
       &quot;xaxis.minallowed&quot;:0,
       &quot;yaxis.minallowed&quot;:0,
 
+      &quot;legend.font.size&quot;:10,
+      &quot;legend.y&quot;:1.015,
+
       &quot;title.text&quot;:`&lt;b&gt;프로 지명 대학투수의&lt;br&gt;탈삼진과 제구력&lt;/b&gt;&lt;br&gt;&lt;span style='font-size:11px;color:#64748b'&gt;오른쪽 아래일수록 높은 탈삼진 + 낮은 볼넷&lt;/span&gt;`,
-      &quot;title.font.size&quot;:16,
+      &quot;title.font.size&quot;:15,
       &quot;title.x&quot;:0.02,
       &quot;title.xanchor&quot;:&quot;left&quot;,
-      &quot;title.y&quot;:0.955,
-      &quot;title.yanchor&quot;:&quot;top&quot;
+      &quot;title.y&quot;:0.94,
+      &quot;title.yanchor&quot;:&quot;top&quot;,
+      &quot;title.pad.t&quot;:6,
+      &quot;title.pad.b&quot;:4
     }).then(function(){
       Plotly.Plots.resize(gd);
     });
@@ -1025,7 +1040,7 @@ window.addEventListener(&quot;load&quot;,function(){
     const gd=document.querySelector(&quot;.plotly-graph-div&quot;);
     if(!gd || !window.Plotly || window.innerWidth&gt;700) return;
 
-    const mobileHeight = window.innerWidth&lt;=420 ? 600 : 620;
+    const mobileHeight = 600;
 
     Plotly.relayout(gd,{
       height:mobileHeight,
@@ -1034,15 +1049,15 @@ window.addEventListener(&quot;load&quot;,function(){
       hoverdistance:52,
       spikedistance:52,
 
-      &quot;margin.t&quot;:128,
-      &quot;margin.b&quot;:82,
-      &quot;margin.l&quot;:64,
-      &quot;margin.r&quot;:16,
+      &quot;margin.t&quot;:105,
+      &quot;margin.b&quot;:55,
+      &quot;margin.l&quot;:58,
+      &quot;margin.r&quot;:12,
 
       &quot;xaxis.automargin&quot;:true,
       &quot;yaxis.automargin&quot;:true,
-      &quot;xaxis.title.standoff&quot;:12,
-      &quot;yaxis.title.standoff&quot;:8,
+      &quot;xaxis.title.standoff&quot;:9,
+      &quot;yaxis.title.standoff&quot;:7,
       &quot;xaxis.tickfont.size&quot;:11,
       &quot;yaxis.tickfont.size&quot;:11,
       &quot;xaxis.title.font.size&quot;:13,
@@ -1053,12 +1068,17 @@ window.addEventListener(&quot;load&quot;,function(){
       &quot;xaxis.minallowed&quot;:0,
       &quot;yaxis.minallowed&quot;:0,
 
+      &quot;legend.font.size&quot;:10,
+      &quot;legend.y&quot;:1.015,
+
       &quot;title.text&quot;:`&lt;b&gt;프로 지명 대학투수의&lt;br&gt;출루 억제와 실점 억제&lt;/b&gt;&lt;br&gt;&lt;span style='font-size:11px;color:#64748b'&gt;왼쪽 아래일수록 출루와 실점 모두 억제한 유형&lt;/span&gt;`,
-      &quot;title.font.size&quot;:16,
+      &quot;title.font.size&quot;:15,
       &quot;title.x&quot;:0.02,
       &quot;title.xanchor&quot;:&quot;left&quot;,
-      &quot;title.y&quot;:0.955,
-      &quot;title.yanchor&quot;:&quot;top&quot;
+      &quot;title.y&quot;:0.94,
+      &quot;title.yanchor&quot;:&quot;top&quot;,
+      &quot;title.pad.t&quot;:6,
+      &quot;title.pad.b&quot;:4
     }).then(function(){
       Plotly.Plots.resize(gd);
     });
