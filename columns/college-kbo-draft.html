@@ -434,53 +434,67 @@ html,body{overscroll-behavior:contain}
   .modebar{display:none!important}
 }
 &lt;/style&gt;
-&lt;script id=&quot;sv-final-label-ring-v4&quot;&gt;
+&lt;script id=&quot;sv-top-round-v6&quot;&gt;
 window.addEventListener(&quot;load&quot;, function(){
   setTimeout(function(){
     const gd=document.querySelector(&quot;.plotly-graph-div&quot;);
-    if(!gd || !window.Plotly || !Array.isArray(gd.data)) return;
-
+    if(!gd || !window.Plotly) return;
+    const src=(Array.isArray(gd._fullData) &amp;&amp; gd._fullData.length) ? gd._fullData : gd.data;
+    if(!Array.isArray(src)) return;
     const MAX_ROUND=5;
-    const hide=[];
+    const FONT=&quot;Pretendard, Apple SD Gothic Neo, Malgun Gothic, sans-serif&quot;;
 
-    gd.data.forEach(function(tr,idx){
-      const mode=String(tr.mode||&quot;&quot;);
-      if(mode.indexOf(&quot;text&quot;)!==-1) hide.push(idx);
-    });
-    if(hide.length) Plotly.restyle(gd,{visible:false},hide);
+    function arr(v){
+      if(v==null) return null;
+      if(Array.isArray(v) || ArrayBuffer.isView(v)) return v;
+      if(typeof v===&quot;object&quot; &amp;&amp; typeof v.bdata===&quot;string&quot;){
+        const T={f8:Float64Array,f4:Float32Array,i4:Int32Array,u4:Uint32Array,i2:Int16Array,u2:Uint16Array,i1:Int8Array,u1:Uint8Array,c1:Uint8ClampedArray}[v.dtype];
+        if(!T) return null;
+        const bin=atob(v.bdata), u8=new Uint8Array(bin.length);
+        for(let i=0;i&lt;bin.length;i++) u8[i]=bin.charCodeAt(i);
+        return new T(u8.buffer);
+      }
+      return null;
+    }
 
-    const pts=[];
+    const hide=[], pts=[];
     let commonHover=null;
 
-    gd.data.forEach(function(tr){
+    src.forEach(function(tr,i){
+      const idx=(typeof tr.index===&quot;number&quot;)?tr.index:i;
       const mode=String(tr.mode||&quot;&quot;);
+      const name=String(tr.name||&quot;&quot;);
+      if(name.indexOf(&quot;sv_&quot;)===0) return;
+      if(mode.indexOf(&quot;text&quot;)!==-1){ hide.push(idx); return; }
       if(mode.indexOf(&quot;markers&quot;)===-1 || !tr.customdata || !tr.hovertext) return;
-      if(String(tr.name||&quot;&quot;).indexOf(&quot;sv_&quot;)===0) return;
       if(!commonHover &amp;&amp; tr.hovertemplate) commonHover=tr.hovertemplate;
 
+      const xs=arr(tr.x), ys=arr(tr.y);
+      if(!xs || !ys) return;
       const marker=tr.marker||{};
-      for(let i=0;i&lt;tr.customdata.length;i++){
-        const cd=tr.customdata[i];
+      const sizes=arr(marker.size);
+      const colors=arr(marker.color);
+      const ref=Number(marker.sizeref)||1;
+      const area=marker.sizemode===&quot;area&quot;;
+      const smin=Number(marker.sizemin)||0;
+
+      for(let k=0;k&lt;tr.customdata.length;k++){
+        const cd=tr.customdata[k];
         if(!cd || cd.length&lt;3) continue;
         const m=String(cd[2]||&quot;&quot;).match(/(\d+)/);
         if(!m || parseInt(m[1],10)&gt;MAX_ROUND) continue;
-
-        const x=Number(tr.x &amp;&amp; tr.x[i]);
-        const y=Number(tr.y &amp;&amp; tr.y[i]);
+        const x=Number(xs[k]), y=Number(ys[k]);
         if(!Number.isFinite(x) || !Number.isFinite(y)) continue;
 
-        let color=marker.color;
-        if(Array.isArray(color) || ArrayBuffer.isView(color)) color=color[i];
-        if(!color) color=&quot;#475569&quot;;
+        let d=13;
+        const raw=sizes?Number(sizes[k]):Number(marker.size);
+        if(Number.isFinite(raw) &amp;&amp; raw&gt;0) d=area?Math.sqrt(raw/ref):raw/ref;
+        d=Math.max(d,2*smin,11);
 
-        let size=13;
-        if(typeof marker.size===&quot;number&quot;) size=marker.size;
-        else if(Array.isArray(marker.size) || ArrayBuffer.isView(marker.size)) size=Number(marker.size[i])||13;
-
-        pts.push({
-          x:x,y:y,name:String(tr.hovertext[i]||&quot;&quot;),
-          customdata:cd,color:color,size:Math.max(13,size)
-        });
+        let color=colors?colors[k]:marker.color;
+        if(!color || typeof color!==&quot;string&quot;) color=&quot;#475569&quot;;
+        const hn=Array.isArray(tr.hovertext)?tr.hovertext[k]:tr.hovertext;
+        pts.push({x:x,y:y,name:String(hn||&quot;&quot;),customdata:cd,color:color,size:d});
       }
     });
 
@@ -489,36 +503,40 @@ window.addEventListener(&quot;load&quot;, function(){
       const k=p.name+&quot;|&quot;+p.x+&quot;|&quot;+p.y;
       if(!seen.has(k)){seen.add(k);uniq.push(p);}
     });
+    /* 강조 대상이 없으면 기존 이름 레이어를 그대로 둔다 */
     if(!uniq.length) return;
+    uniq.sort(function(a,b){return b.size-a.size;});
 
-    Plotly.addTraces(gd,[
-      {
-        x:uniq.map(p=&gt;p.x),y:uniq.map(p=&gt;p.y),
-        mode:&quot;markers&quot;,
-        marker:{size:uniq.map(p=&gt;p.size+15),color:&quot;#334155&quot;,opacity:1,line:{width:0}},
-        hoverinfo:&quot;skip&quot;,showlegend:false,cliponaxis:false,name:&quot;sv_ring_outer&quot;
-      },
-      {
-        x:uniq.map(p=&gt;p.x),y:uniq.map(p=&gt;p.y),
-        mode:&quot;markers&quot;,
-        marker:{size:uniq.map(p=&gt;p.size+12),color:&quot;#ffffff&quot;,opacity:1,line:{width:0}},
-        hoverinfo:&quot;skip&quot;,showlegend:false,cliponaxis:false,name:&quot;sv_ring_white&quot;
-      },
-      {
-        x:uniq.map(p=&gt;p.x),y:uniq.map(p=&gt;p.y),
-        mode:&quot;markers+text&quot;,
-        marker:{size:uniq.map(p=&gt;p.size+3),color:uniq.map(p=&gt;p.color),opacity:1,line:{width:0}},
-        text:uniq.map(p=&gt;&quot;&lt;b&gt;&quot;+p.name+&quot;&lt;/b&gt;&quot;),
-        textposition:&quot;bottom center&quot;,
-        textfont:{family:&quot;Pretendard, Apple SD Gothic Neo, Malgun Gothic, sans-serif&quot;,size:11,color:&quot;#0f172a&quot;},
-        hovertext:uniq.map(p=&gt;p.name),
-        customdata:uniq.map(p=&gt;p.customdata),
-        hovertemplate:commonHover||&quot;&lt;b&gt;%{hovertext}&lt;/b&gt;&lt;extra&gt;&lt;/extra&gt;&quot;,
-        hoverlabel:{bgcolor:&quot;rgba(255,255,255,.98)&quot;,bordercolor:&quot;#94a3b8&quot;,
-          font:{family:&quot;Pretendard, Apple SD Gothic Neo, Malgun Gothic, sans-serif&quot;,size:13,color:&quot;#0f172a&quot;}},
-        showlegend:false,cliponaxis:false,name:&quot;sv_top_round&quot;
-      }
-    ]);
+    const X=uniq.map(p=&gt;p.x), Y=uniq.map(p=&gt;p.y);
+    const small=window.innerWidth&lt;=700;
+    const p0=hide.length?Plotly.restyle(gd,{visible:false},hide):Promise.resolve();
+    Promise.resolve(p0).then(function(){
+      return Plotly.addTraces(gd,[
+        {
+          x:X,y:Y,type:&quot;scatter&quot;,mode:&quot;markers&quot;,
+          marker:{size:uniq.map(p=&gt;p.size+11),color:&quot;#1e293b&quot;,opacity:1,line:{width:0}},
+          hoverinfo:&quot;skip&quot;,showlegend:false,cliponaxis:false,name:&quot;sv_ring_outer&quot;
+        },
+        {
+          x:X,y:Y,type:&quot;scatter&quot;,mode:&quot;markers&quot;,
+          marker:{size:uniq.map(p=&gt;p.size+8.5),color:&quot;#ffffff&quot;,opacity:1,line:{width:0}},
+          hoverinfo:&quot;skip&quot;,showlegend:false,cliponaxis:false,name:&quot;sv_ring_white&quot;
+        },
+        {
+          x:X,y:Y,type:&quot;scatter&quot;,mode:&quot;markers+text&quot;,
+          marker:{size:uniq.map(p=&gt;p.size),color:uniq.map(p=&gt;p.color),opacity:1,line:{width:0}},
+          text:uniq.map(p=&gt;&quot;&lt;b&gt;&quot;+p.name+&quot;&lt;/b&gt;&quot;),
+          textposition:&quot;bottom center&quot;,
+          textfont:{family:FONT,size:small?12.5:13,color:&quot;#0b1220&quot;},
+          hovertext:uniq.map(p=&gt;p.name),
+          customdata:uniq.map(p=&gt;p.customdata),
+          hovertemplate:commonHover||&quot;&lt;b&gt;%{hovertext}&lt;/b&gt;&lt;extra&gt;&lt;/extra&gt;&quot;,
+          hoverlabel:{bgcolor:&quot;rgba(255,255,255,.98)&quot;,bordercolor:&quot;#94a3b8&quot;,
+            font:{family:FONT,size:13,color:&quot;#0f172a&quot;}},
+          showlegend:false,cliponaxis:false,name:&quot;sv_top_round&quot;
+        }
+      ]);
+    });
   },380);
 });
 &lt;/script&gt;
@@ -576,20 +594,31 @@ window.addEventListener(&quot;load&quot;,function(){
         hoverdistance:52,
         spikedistance:52,
 
-        &quot;margin.t&quot;:58,
+        &quot;margin.t&quot;:84,
         &quot;margin.b&quot;:54,
         &quot;margin.l&quot;:46,
         &quot;margin.r&quot;:12,
         &quot;margin.pad&quot;:0,
 
         &quot;title.text&quot;:&quot;&quot;,
-        &quot;legend.title.text&quot;:&quot;&quot;,
-        &quot;legend.font.size&quot;:narrow?12:13,
-        &quot;legend.y&quot;:1.015,
-        &quot;legend.x&quot;:0,
-        &quot;legend.xanchor&quot;:&quot;left&quot;,
-        &quot;legend.yanchor&quot;:&quot;bottom&quot;,
-        &quot;legend.borderwidth&quot;:0,
+        &quot;legend.title.text&quot;:&quot;&lt;b&gt;드래프트 연도&lt;/b&gt;&quot;,
+        &quot;legend.title.side&quot;:&quot;top&quot;,
+        &quot;legend.title.font.size&quot;:12,
+        &quot;legend.title.font.color&quot;:&quot;#475569&quot;,
+        &quot;legend.orientation&quot;:&quot;h&quot;,
+        &quot;legend.font.size&quot;:narrow?12.5:13.5,
+        &quot;legend.font.color&quot;:&quot;#0f172a&quot;,
+        &quot;legend.itemsizing&quot;:&quot;constant&quot;,
+        &quot;legend.itemwidth&quot;:30,
+        &quot;legend.xref&quot;:&quot;container&quot;,
+        &quot;legend.x&quot;:0.5,
+        &quot;legend.xanchor&quot;:&quot;center&quot;,
+        &quot;legend.yref&quot;:&quot;container&quot;,
+        &quot;legend.y&quot;:0.992,
+        &quot;legend.yanchor&quot;:&quot;top&quot;,
+        &quot;legend.bgcolor&quot;:&quot;#f5f7ff&quot;,
+        &quot;legend.bordercolor&quot;:&quot;#c7d0ea&quot;,
+        &quot;legend.borderwidth&quot;:1,
 
         &quot;xaxis.automargin&quot;:true,
         &quot;yaxis.automargin&quot;:true,
@@ -618,10 +647,7 @@ window.addEventListener(&quot;load&quot;,function(){
     });
     if(idx.length!==3) return Promise.resolve();
     const small=window.innerWidth&lt;=700;
-    return Plotly.moveTraces(gd,idx).then(function(){
-      const n=gd.data.length;
-      return Plotly.restyle(gd,{&quot;textfont.size&quot;:small?12.5:12.5,&quot;textfont.color&quot;:&quot;#0b1220&quot;},[n-1]);
-    });
+    return Plotly.moveTraces(gd,idx);
   }
   setTimeout(function(){ raise().then(fit,fit); },700);
   setTimeout(function(){Plotly.Plots.resize(gd);},1500);
@@ -696,53 +722,67 @@ html,body{overscroll-behavior:contain}
   .modebar{display:none!important}
 }
 &lt;/style&gt;
-&lt;script id=&quot;sv-final-label-ring-v4&quot;&gt;
+&lt;script id=&quot;sv-top-round-v6&quot;&gt;
 window.addEventListener(&quot;load&quot;, function(){
   setTimeout(function(){
     const gd=document.querySelector(&quot;.plotly-graph-div&quot;);
-    if(!gd || !window.Plotly || !Array.isArray(gd.data)) return;
-
+    if(!gd || !window.Plotly) return;
+    const src=(Array.isArray(gd._fullData) &amp;&amp; gd._fullData.length) ? gd._fullData : gd.data;
+    if(!Array.isArray(src)) return;
     const MAX_ROUND=5;
-    const hide=[];
+    const FONT=&quot;Pretendard, Apple SD Gothic Neo, Malgun Gothic, sans-serif&quot;;
 
-    gd.data.forEach(function(tr,idx){
-      const mode=String(tr.mode||&quot;&quot;);
-      if(mode.indexOf(&quot;text&quot;)!==-1) hide.push(idx);
-    });
-    if(hide.length) Plotly.restyle(gd,{visible:false},hide);
+    function arr(v){
+      if(v==null) return null;
+      if(Array.isArray(v) || ArrayBuffer.isView(v)) return v;
+      if(typeof v===&quot;object&quot; &amp;&amp; typeof v.bdata===&quot;string&quot;){
+        const T={f8:Float64Array,f4:Float32Array,i4:Int32Array,u4:Uint32Array,i2:Int16Array,u2:Uint16Array,i1:Int8Array,u1:Uint8Array,c1:Uint8ClampedArray}[v.dtype];
+        if(!T) return null;
+        const bin=atob(v.bdata), u8=new Uint8Array(bin.length);
+        for(let i=0;i&lt;bin.length;i++) u8[i]=bin.charCodeAt(i);
+        return new T(u8.buffer);
+      }
+      return null;
+    }
 
-    const pts=[];
+    const hide=[], pts=[];
     let commonHover=null;
 
-    gd.data.forEach(function(tr){
+    src.forEach(function(tr,i){
+      const idx=(typeof tr.index===&quot;number&quot;)?tr.index:i;
       const mode=String(tr.mode||&quot;&quot;);
+      const name=String(tr.name||&quot;&quot;);
+      if(name.indexOf(&quot;sv_&quot;)===0) return;
+      if(mode.indexOf(&quot;text&quot;)!==-1){ hide.push(idx); return; }
       if(mode.indexOf(&quot;markers&quot;)===-1 || !tr.customdata || !tr.hovertext) return;
-      if(String(tr.name||&quot;&quot;).indexOf(&quot;sv_&quot;)===0) return;
       if(!commonHover &amp;&amp; tr.hovertemplate) commonHover=tr.hovertemplate;
 
+      const xs=arr(tr.x), ys=arr(tr.y);
+      if(!xs || !ys) return;
       const marker=tr.marker||{};
-      for(let i=0;i&lt;tr.customdata.length;i++){
-        const cd=tr.customdata[i];
+      const sizes=arr(marker.size);
+      const colors=arr(marker.color);
+      const ref=Number(marker.sizeref)||1;
+      const area=marker.sizemode===&quot;area&quot;;
+      const smin=Number(marker.sizemin)||0;
+
+      for(let k=0;k&lt;tr.customdata.length;k++){
+        const cd=tr.customdata[k];
         if(!cd || cd.length&lt;3) continue;
         const m=String(cd[2]||&quot;&quot;).match(/(\d+)/);
         if(!m || parseInt(m[1],10)&gt;MAX_ROUND) continue;
-
-        const x=Number(tr.x &amp;&amp; tr.x[i]);
-        const y=Number(tr.y &amp;&amp; tr.y[i]);
+        const x=Number(xs[k]), y=Number(ys[k]);
         if(!Number.isFinite(x) || !Number.isFinite(y)) continue;
 
-        let color=marker.color;
-        if(Array.isArray(color) || ArrayBuffer.isView(color)) color=color[i];
-        if(!color) color=&quot;#475569&quot;;
+        let d=13;
+        const raw=sizes?Number(sizes[k]):Number(marker.size);
+        if(Number.isFinite(raw) &amp;&amp; raw&gt;0) d=area?Math.sqrt(raw/ref):raw/ref;
+        d=Math.max(d,2*smin,11);
 
-        let size=13;
-        if(typeof marker.size===&quot;number&quot;) size=marker.size;
-        else if(Array.isArray(marker.size) || ArrayBuffer.isView(marker.size)) size=Number(marker.size[i])||13;
-
-        pts.push({
-          x:x,y:y,name:String(tr.hovertext[i]||&quot;&quot;),
-          customdata:cd,color:color,size:Math.max(13,size)
-        });
+        let color=colors?colors[k]:marker.color;
+        if(!color || typeof color!==&quot;string&quot;) color=&quot;#475569&quot;;
+        const hn=Array.isArray(tr.hovertext)?tr.hovertext[k]:tr.hovertext;
+        pts.push({x:x,y:y,name:String(hn||&quot;&quot;),customdata:cd,color:color,size:d});
       }
     });
 
@@ -751,36 +791,40 @@ window.addEventListener(&quot;load&quot;, function(){
       const k=p.name+&quot;|&quot;+p.x+&quot;|&quot;+p.y;
       if(!seen.has(k)){seen.add(k);uniq.push(p);}
     });
+    /* 강조 대상이 없으면 기존 이름 레이어를 그대로 둔다 */
     if(!uniq.length) return;
+    uniq.sort(function(a,b){return b.size-a.size;});
 
-    Plotly.addTraces(gd,[
-      {
-        x:uniq.map(p=&gt;p.x),y:uniq.map(p=&gt;p.y),
-        mode:&quot;markers&quot;,
-        marker:{size:uniq.map(p=&gt;p.size+15),color:&quot;#334155&quot;,opacity:1,line:{width:0}},
-        hoverinfo:&quot;skip&quot;,showlegend:false,cliponaxis:false,name:&quot;sv_ring_outer&quot;
-      },
-      {
-        x:uniq.map(p=&gt;p.x),y:uniq.map(p=&gt;p.y),
-        mode:&quot;markers&quot;,
-        marker:{size:uniq.map(p=&gt;p.size+12),color:&quot;#ffffff&quot;,opacity:1,line:{width:0}},
-        hoverinfo:&quot;skip&quot;,showlegend:false,cliponaxis:false,name:&quot;sv_ring_white&quot;
-      },
-      {
-        x:uniq.map(p=&gt;p.x),y:uniq.map(p=&gt;p.y),
-        mode:&quot;markers+text&quot;,
-        marker:{size:uniq.map(p=&gt;p.size+3),color:uniq.map(p=&gt;p.color),opacity:1,line:{width:0}},
-        text:uniq.map(p=&gt;&quot;&lt;b&gt;&quot;+p.name+&quot;&lt;/b&gt;&quot;),
-        textposition:&quot;bottom center&quot;,
-        textfont:{family:&quot;Pretendard, Apple SD Gothic Neo, Malgun Gothic, sans-serif&quot;,size:11,color:&quot;#0f172a&quot;},
-        hovertext:uniq.map(p=&gt;p.name),
-        customdata:uniq.map(p=&gt;p.customdata),
-        hovertemplate:commonHover||&quot;&lt;b&gt;%{hovertext}&lt;/b&gt;&lt;extra&gt;&lt;/extra&gt;&quot;,
-        hoverlabel:{bgcolor:&quot;rgba(255,255,255,.98)&quot;,bordercolor:&quot;#94a3b8&quot;,
-          font:{family:&quot;Pretendard, Apple SD Gothic Neo, Malgun Gothic, sans-serif&quot;,size:13,color:&quot;#0f172a&quot;}},
-        showlegend:false,cliponaxis:false,name:&quot;sv_top_round&quot;
-      }
-    ]);
+    const X=uniq.map(p=&gt;p.x), Y=uniq.map(p=&gt;p.y);
+    const small=window.innerWidth&lt;=700;
+    const p0=hide.length?Plotly.restyle(gd,{visible:false},hide):Promise.resolve();
+    Promise.resolve(p0).then(function(){
+      return Plotly.addTraces(gd,[
+        {
+          x:X,y:Y,type:&quot;scatter&quot;,mode:&quot;markers&quot;,
+          marker:{size:uniq.map(p=&gt;p.size+11),color:&quot;#1e293b&quot;,opacity:1,line:{width:0}},
+          hoverinfo:&quot;skip&quot;,showlegend:false,cliponaxis:false,name:&quot;sv_ring_outer&quot;
+        },
+        {
+          x:X,y:Y,type:&quot;scatter&quot;,mode:&quot;markers&quot;,
+          marker:{size:uniq.map(p=&gt;p.size+8.5),color:&quot;#ffffff&quot;,opacity:1,line:{width:0}},
+          hoverinfo:&quot;skip&quot;,showlegend:false,cliponaxis:false,name:&quot;sv_ring_white&quot;
+        },
+        {
+          x:X,y:Y,type:&quot;scatter&quot;,mode:&quot;markers+text&quot;,
+          marker:{size:uniq.map(p=&gt;p.size),color:uniq.map(p=&gt;p.color),opacity:1,line:{width:0}},
+          text:uniq.map(p=&gt;&quot;&lt;b&gt;&quot;+p.name+&quot;&lt;/b&gt;&quot;),
+          textposition:&quot;bottom center&quot;,
+          textfont:{family:FONT,size:small?12.5:13,color:&quot;#0b1220&quot;},
+          hovertext:uniq.map(p=&gt;p.name),
+          customdata:uniq.map(p=&gt;p.customdata),
+          hovertemplate:commonHover||&quot;&lt;b&gt;%{hovertext}&lt;/b&gt;&lt;extra&gt;&lt;/extra&gt;&quot;,
+          hoverlabel:{bgcolor:&quot;rgba(255,255,255,.98)&quot;,bordercolor:&quot;#94a3b8&quot;,
+            font:{family:FONT,size:13,color:&quot;#0f172a&quot;}},
+          showlegend:false,cliponaxis:false,name:&quot;sv_top_round&quot;
+        }
+      ]);
+    });
   },380);
 });
 &lt;/script&gt;
@@ -838,20 +882,31 @@ window.addEventListener(&quot;load&quot;,function(){
         hoverdistance:52,
         spikedistance:52,
 
-        &quot;margin.t&quot;:58,
+        &quot;margin.t&quot;:84,
         &quot;margin.b&quot;:54,
         &quot;margin.l&quot;:46,
         &quot;margin.r&quot;:12,
         &quot;margin.pad&quot;:0,
 
         &quot;title.text&quot;:&quot;&quot;,
-        &quot;legend.title.text&quot;:&quot;&quot;,
-        &quot;legend.font.size&quot;:narrow?12:13,
-        &quot;legend.y&quot;:1.015,
-        &quot;legend.x&quot;:0,
-        &quot;legend.xanchor&quot;:&quot;left&quot;,
-        &quot;legend.yanchor&quot;:&quot;bottom&quot;,
-        &quot;legend.borderwidth&quot;:0,
+        &quot;legend.title.text&quot;:&quot;&lt;b&gt;드래프트 연도&lt;/b&gt;&quot;,
+        &quot;legend.title.side&quot;:&quot;top&quot;,
+        &quot;legend.title.font.size&quot;:12,
+        &quot;legend.title.font.color&quot;:&quot;#475569&quot;,
+        &quot;legend.orientation&quot;:&quot;h&quot;,
+        &quot;legend.font.size&quot;:narrow?12.5:13.5,
+        &quot;legend.font.color&quot;:&quot;#0f172a&quot;,
+        &quot;legend.itemsizing&quot;:&quot;constant&quot;,
+        &quot;legend.itemwidth&quot;:30,
+        &quot;legend.xref&quot;:&quot;container&quot;,
+        &quot;legend.x&quot;:0.5,
+        &quot;legend.xanchor&quot;:&quot;center&quot;,
+        &quot;legend.yref&quot;:&quot;container&quot;,
+        &quot;legend.y&quot;:0.992,
+        &quot;legend.yanchor&quot;:&quot;top&quot;,
+        &quot;legend.bgcolor&quot;:&quot;#f5f7ff&quot;,
+        &quot;legend.bordercolor&quot;:&quot;#c7d0ea&quot;,
+        &quot;legend.borderwidth&quot;:1,
 
         &quot;xaxis.automargin&quot;:true,
         &quot;yaxis.automargin&quot;:true,
@@ -880,10 +935,7 @@ window.addEventListener(&quot;load&quot;,function(){
     });
     if(idx.length!==3) return Promise.resolve();
     const small=window.innerWidth&lt;=700;
-    return Plotly.moveTraces(gd,idx).then(function(){
-      const n=gd.data.length;
-      return Plotly.restyle(gd,{&quot;textfont.size&quot;:small?12.5:12.5,&quot;textfont.color&quot;:&quot;#0b1220&quot;},[n-1]);
-    });
+    return Plotly.moveTraces(gd,idx);
   }
   setTimeout(function(){ raise().then(fit,fit); },700);
   setTimeout(function(){Plotly.Plots.resize(gd);},1500);
@@ -960,53 +1012,67 @@ html,body{overscroll-behavior:contain}
   .modebar{display:none!important}
 }
 &lt;/style&gt;
-&lt;script id=&quot;sv-final-label-ring-v4&quot;&gt;
+&lt;script id=&quot;sv-top-round-v6&quot;&gt;
 window.addEventListener(&quot;load&quot;, function(){
   setTimeout(function(){
     const gd=document.querySelector(&quot;.plotly-graph-div&quot;);
-    if(!gd || !window.Plotly || !Array.isArray(gd.data)) return;
-
+    if(!gd || !window.Plotly) return;
+    const src=(Array.isArray(gd._fullData) &amp;&amp; gd._fullData.length) ? gd._fullData : gd.data;
+    if(!Array.isArray(src)) return;
     const MAX_ROUND=3;
-    const hide=[];
+    const FONT=&quot;Pretendard, Apple SD Gothic Neo, Malgun Gothic, sans-serif&quot;;
 
-    gd.data.forEach(function(tr,idx){
-      const mode=String(tr.mode||&quot;&quot;);
-      if(mode.indexOf(&quot;text&quot;)!==-1) hide.push(idx);
-    });
-    if(hide.length) Plotly.restyle(gd,{visible:false},hide);
+    function arr(v){
+      if(v==null) return null;
+      if(Array.isArray(v) || ArrayBuffer.isView(v)) return v;
+      if(typeof v===&quot;object&quot; &amp;&amp; typeof v.bdata===&quot;string&quot;){
+        const T={f8:Float64Array,f4:Float32Array,i4:Int32Array,u4:Uint32Array,i2:Int16Array,u2:Uint16Array,i1:Int8Array,u1:Uint8Array,c1:Uint8ClampedArray}[v.dtype];
+        if(!T) return null;
+        const bin=atob(v.bdata), u8=new Uint8Array(bin.length);
+        for(let i=0;i&lt;bin.length;i++) u8[i]=bin.charCodeAt(i);
+        return new T(u8.buffer);
+      }
+      return null;
+    }
 
-    const pts=[];
+    const hide=[], pts=[];
     let commonHover=null;
 
-    gd.data.forEach(function(tr){
+    src.forEach(function(tr,i){
+      const idx=(typeof tr.index===&quot;number&quot;)?tr.index:i;
       const mode=String(tr.mode||&quot;&quot;);
+      const name=String(tr.name||&quot;&quot;);
+      if(name.indexOf(&quot;sv_&quot;)===0) return;
+      if(mode.indexOf(&quot;text&quot;)!==-1){ hide.push(idx); return; }
       if(mode.indexOf(&quot;markers&quot;)===-1 || !tr.customdata || !tr.hovertext) return;
-      if(String(tr.name||&quot;&quot;).indexOf(&quot;sv_&quot;)===0) return;
       if(!commonHover &amp;&amp; tr.hovertemplate) commonHover=tr.hovertemplate;
 
+      const xs=arr(tr.x), ys=arr(tr.y);
+      if(!xs || !ys) return;
       const marker=tr.marker||{};
-      for(let i=0;i&lt;tr.customdata.length;i++){
-        const cd=tr.customdata[i];
+      const sizes=arr(marker.size);
+      const colors=arr(marker.color);
+      const ref=Number(marker.sizeref)||1;
+      const area=marker.sizemode===&quot;area&quot;;
+      const smin=Number(marker.sizemin)||0;
+
+      for(let k=0;k&lt;tr.customdata.length;k++){
+        const cd=tr.customdata[k];
         if(!cd || cd.length&lt;3) continue;
         const m=String(cd[2]||&quot;&quot;).match(/(\d+)/);
         if(!m || parseInt(m[1],10)&gt;MAX_ROUND) continue;
-
-        const x=Number(tr.x &amp;&amp; tr.x[i]);
-        const y=Number(tr.y &amp;&amp; tr.y[i]);
+        const x=Number(xs[k]), y=Number(ys[k]);
         if(!Number.isFinite(x) || !Number.isFinite(y)) continue;
 
-        let color=marker.color;
-        if(Array.isArray(color) || ArrayBuffer.isView(color)) color=color[i];
-        if(!color) color=&quot;#475569&quot;;
+        let d=13;
+        const raw=sizes?Number(sizes[k]):Number(marker.size);
+        if(Number.isFinite(raw) &amp;&amp; raw&gt;0) d=area?Math.sqrt(raw/ref):raw/ref;
+        d=Math.max(d,2*smin,11);
 
-        let size=13;
-        if(typeof marker.size===&quot;number&quot;) size=marker.size;
-        else if(Array.isArray(marker.size) || ArrayBuffer.isView(marker.size)) size=Number(marker.size[i])||13;
-
-        pts.push({
-          x:x,y:y,name:String(tr.hovertext[i]||&quot;&quot;),
-          customdata:cd,color:color,size:Math.max(13,size)
-        });
+        let color=colors?colors[k]:marker.color;
+        if(!color || typeof color!==&quot;string&quot;) color=&quot;#475569&quot;;
+        const hn=Array.isArray(tr.hovertext)?tr.hovertext[k]:tr.hovertext;
+        pts.push({x:x,y:y,name:String(hn||&quot;&quot;),customdata:cd,color:color,size:d});
       }
     });
 
@@ -1015,36 +1081,40 @@ window.addEventListener(&quot;load&quot;, function(){
       const k=p.name+&quot;|&quot;+p.x+&quot;|&quot;+p.y;
       if(!seen.has(k)){seen.add(k);uniq.push(p);}
     });
+    /* 강조 대상이 없으면 기존 이름 레이어를 그대로 둔다 */
     if(!uniq.length) return;
+    uniq.sort(function(a,b){return b.size-a.size;});
 
-    Plotly.addTraces(gd,[
-      {
-        x:uniq.map(p=&gt;p.x),y:uniq.map(p=&gt;p.y),
-        mode:&quot;markers&quot;,
-        marker:{size:uniq.map(p=&gt;p.size+15),color:&quot;#334155&quot;,opacity:1,line:{width:0}},
-        hoverinfo:&quot;skip&quot;,showlegend:false,cliponaxis:false,name:&quot;sv_ring_outer&quot;
-      },
-      {
-        x:uniq.map(p=&gt;p.x),y:uniq.map(p=&gt;p.y),
-        mode:&quot;markers&quot;,
-        marker:{size:uniq.map(p=&gt;p.size+12),color:&quot;#ffffff&quot;,opacity:1,line:{width:0}},
-        hoverinfo:&quot;skip&quot;,showlegend:false,cliponaxis:false,name:&quot;sv_ring_white&quot;
-      },
-      {
-        x:uniq.map(p=&gt;p.x),y:uniq.map(p=&gt;p.y),
-        mode:&quot;markers+text&quot;,
-        marker:{size:uniq.map(p=&gt;p.size+3),color:uniq.map(p=&gt;p.color),opacity:1,line:{width:0}},
-        text:uniq.map(p=&gt;&quot;&lt;b&gt;&quot;+p.name+&quot;&lt;/b&gt;&quot;),
-        textposition:&quot;bottom center&quot;,
-        textfont:{family:&quot;Pretendard, Apple SD Gothic Neo, Malgun Gothic, sans-serif&quot;,size:11,color:&quot;#0f172a&quot;},
-        hovertext:uniq.map(p=&gt;p.name),
-        customdata:uniq.map(p=&gt;p.customdata),
-        hovertemplate:commonHover||&quot;&lt;b&gt;%{hovertext}&lt;/b&gt;&lt;extra&gt;&lt;/extra&gt;&quot;,
-        hoverlabel:{bgcolor:&quot;rgba(255,255,255,.98)&quot;,bordercolor:&quot;#94a3b8&quot;,
-          font:{family:&quot;Pretendard, Apple SD Gothic Neo, Malgun Gothic, sans-serif&quot;,size:13,color:&quot;#0f172a&quot;}},
-        showlegend:false,cliponaxis:false,name:&quot;sv_top_round&quot;
-      }
-    ]);
+    const X=uniq.map(p=&gt;p.x), Y=uniq.map(p=&gt;p.y);
+    const small=window.innerWidth&lt;=700;
+    const p0=hide.length?Plotly.restyle(gd,{visible:false},hide):Promise.resolve();
+    Promise.resolve(p0).then(function(){
+      return Plotly.addTraces(gd,[
+        {
+          x:X,y:Y,type:&quot;scatter&quot;,mode:&quot;markers&quot;,
+          marker:{size:uniq.map(p=&gt;p.size+11),color:&quot;#1e293b&quot;,opacity:1,line:{width:0}},
+          hoverinfo:&quot;skip&quot;,showlegend:false,cliponaxis:false,name:&quot;sv_ring_outer&quot;
+        },
+        {
+          x:X,y:Y,type:&quot;scatter&quot;,mode:&quot;markers&quot;,
+          marker:{size:uniq.map(p=&gt;p.size+8.5),color:&quot;#ffffff&quot;,opacity:1,line:{width:0}},
+          hoverinfo:&quot;skip&quot;,showlegend:false,cliponaxis:false,name:&quot;sv_ring_white&quot;
+        },
+        {
+          x:X,y:Y,type:&quot;scatter&quot;,mode:&quot;markers+text&quot;,
+          marker:{size:uniq.map(p=&gt;p.size),color:uniq.map(p=&gt;p.color),opacity:1,line:{width:0}},
+          text:uniq.map(p=&gt;&quot;&lt;b&gt;&quot;+p.name+&quot;&lt;/b&gt;&quot;),
+          textposition:&quot;bottom center&quot;,
+          textfont:{family:FONT,size:small?12.5:13,color:&quot;#0b1220&quot;},
+          hovertext:uniq.map(p=&gt;p.name),
+          customdata:uniq.map(p=&gt;p.customdata),
+          hovertemplate:commonHover||&quot;&lt;b&gt;%{hovertext}&lt;/b&gt;&lt;extra&gt;&lt;/extra&gt;&quot;,
+          hoverlabel:{bgcolor:&quot;rgba(255,255,255,.98)&quot;,bordercolor:&quot;#94a3b8&quot;,
+            font:{family:FONT,size:13,color:&quot;#0f172a&quot;}},
+          showlegend:false,cliponaxis:false,name:&quot;sv_top_round&quot;
+        }
+      ]);
+    });
   },380);
 });
 &lt;/script&gt;
@@ -1102,20 +1172,31 @@ window.addEventListener(&quot;load&quot;,function(){
         hoverdistance:52,
         spikedistance:52,
 
-        &quot;margin.t&quot;:58,
+        &quot;margin.t&quot;:84,
         &quot;margin.b&quot;:54,
         &quot;margin.l&quot;:46,
         &quot;margin.r&quot;:12,
         &quot;margin.pad&quot;:0,
 
         &quot;title.text&quot;:&quot;&quot;,
-        &quot;legend.title.text&quot;:&quot;&quot;,
-        &quot;legend.font.size&quot;:narrow?12:13,
-        &quot;legend.y&quot;:1.015,
-        &quot;legend.x&quot;:0,
-        &quot;legend.xanchor&quot;:&quot;left&quot;,
-        &quot;legend.yanchor&quot;:&quot;bottom&quot;,
-        &quot;legend.borderwidth&quot;:0,
+        &quot;legend.title.text&quot;:&quot;&lt;b&gt;드래프트 연도&lt;/b&gt;&quot;,
+        &quot;legend.title.side&quot;:&quot;top&quot;,
+        &quot;legend.title.font.size&quot;:12,
+        &quot;legend.title.font.color&quot;:&quot;#475569&quot;,
+        &quot;legend.orientation&quot;:&quot;h&quot;,
+        &quot;legend.font.size&quot;:narrow?12.5:13.5,
+        &quot;legend.font.color&quot;:&quot;#0f172a&quot;,
+        &quot;legend.itemsizing&quot;:&quot;constant&quot;,
+        &quot;legend.itemwidth&quot;:30,
+        &quot;legend.xref&quot;:&quot;container&quot;,
+        &quot;legend.x&quot;:0.5,
+        &quot;legend.xanchor&quot;:&quot;center&quot;,
+        &quot;legend.yref&quot;:&quot;container&quot;,
+        &quot;legend.y&quot;:0.992,
+        &quot;legend.yanchor&quot;:&quot;top&quot;,
+        &quot;legend.bgcolor&quot;:&quot;#f5f7ff&quot;,
+        &quot;legend.bordercolor&quot;:&quot;#c7d0ea&quot;,
+        &quot;legend.borderwidth&quot;:1,
 
         &quot;xaxis.automargin&quot;:true,
         &quot;yaxis.automargin&quot;:true,
@@ -1144,10 +1225,7 @@ window.addEventListener(&quot;load&quot;,function(){
     });
     if(idx.length!==3) return Promise.resolve();
     const small=window.innerWidth&lt;=700;
-    return Plotly.moveTraces(gd,idx).then(function(){
-      const n=gd.data.length;
-      return Plotly.restyle(gd,{&quot;textfont.size&quot;:small?12.5:12.5,&quot;textfont.color&quot;:&quot;#0b1220&quot;},[n-1]);
-    });
+    return Plotly.moveTraces(gd,idx);
   }
   setTimeout(function(){ raise().then(fit,fit); },700);
   setTimeout(function(){Plotly.Plots.resize(gd);},1500);
@@ -1222,53 +1300,67 @@ html,body{overscroll-behavior:contain}
   .modebar{display:none!important}
 }
 &lt;/style&gt;
-&lt;script id=&quot;sv-final-label-ring-v4&quot;&gt;
+&lt;script id=&quot;sv-top-round-v6&quot;&gt;
 window.addEventListener(&quot;load&quot;, function(){
   setTimeout(function(){
     const gd=document.querySelector(&quot;.plotly-graph-div&quot;);
-    if(!gd || !window.Plotly || !Array.isArray(gd.data)) return;
-
+    if(!gd || !window.Plotly) return;
+    const src=(Array.isArray(gd._fullData) &amp;&amp; gd._fullData.length) ? gd._fullData : gd.data;
+    if(!Array.isArray(src)) return;
     const MAX_ROUND=3;
-    const hide=[];
+    const FONT=&quot;Pretendard, Apple SD Gothic Neo, Malgun Gothic, sans-serif&quot;;
 
-    gd.data.forEach(function(tr,idx){
-      const mode=String(tr.mode||&quot;&quot;);
-      if(mode.indexOf(&quot;text&quot;)!==-1) hide.push(idx);
-    });
-    if(hide.length) Plotly.restyle(gd,{visible:false},hide);
+    function arr(v){
+      if(v==null) return null;
+      if(Array.isArray(v) || ArrayBuffer.isView(v)) return v;
+      if(typeof v===&quot;object&quot; &amp;&amp; typeof v.bdata===&quot;string&quot;){
+        const T={f8:Float64Array,f4:Float32Array,i4:Int32Array,u4:Uint32Array,i2:Int16Array,u2:Uint16Array,i1:Int8Array,u1:Uint8Array,c1:Uint8ClampedArray}[v.dtype];
+        if(!T) return null;
+        const bin=atob(v.bdata), u8=new Uint8Array(bin.length);
+        for(let i=0;i&lt;bin.length;i++) u8[i]=bin.charCodeAt(i);
+        return new T(u8.buffer);
+      }
+      return null;
+    }
 
-    const pts=[];
+    const hide=[], pts=[];
     let commonHover=null;
 
-    gd.data.forEach(function(tr){
+    src.forEach(function(tr,i){
+      const idx=(typeof tr.index===&quot;number&quot;)?tr.index:i;
       const mode=String(tr.mode||&quot;&quot;);
+      const name=String(tr.name||&quot;&quot;);
+      if(name.indexOf(&quot;sv_&quot;)===0) return;
+      if(mode.indexOf(&quot;text&quot;)!==-1){ hide.push(idx); return; }
       if(mode.indexOf(&quot;markers&quot;)===-1 || !tr.customdata || !tr.hovertext) return;
-      if(String(tr.name||&quot;&quot;).indexOf(&quot;sv_&quot;)===0) return;
       if(!commonHover &amp;&amp; tr.hovertemplate) commonHover=tr.hovertemplate;
 
+      const xs=arr(tr.x), ys=arr(tr.y);
+      if(!xs || !ys) return;
       const marker=tr.marker||{};
-      for(let i=0;i&lt;tr.customdata.length;i++){
-        const cd=tr.customdata[i];
+      const sizes=arr(marker.size);
+      const colors=arr(marker.color);
+      const ref=Number(marker.sizeref)||1;
+      const area=marker.sizemode===&quot;area&quot;;
+      const smin=Number(marker.sizemin)||0;
+
+      for(let k=0;k&lt;tr.customdata.length;k++){
+        const cd=tr.customdata[k];
         if(!cd || cd.length&lt;3) continue;
         const m=String(cd[2]||&quot;&quot;).match(/(\d+)/);
         if(!m || parseInt(m[1],10)&gt;MAX_ROUND) continue;
-
-        const x=Number(tr.x &amp;&amp; tr.x[i]);
-        const y=Number(tr.y &amp;&amp; tr.y[i]);
+        const x=Number(xs[k]), y=Number(ys[k]);
         if(!Number.isFinite(x) || !Number.isFinite(y)) continue;
 
-        let color=marker.color;
-        if(Array.isArray(color) || ArrayBuffer.isView(color)) color=color[i];
-        if(!color) color=&quot;#475569&quot;;
+        let d=13;
+        const raw=sizes?Number(sizes[k]):Number(marker.size);
+        if(Number.isFinite(raw) &amp;&amp; raw&gt;0) d=area?Math.sqrt(raw/ref):raw/ref;
+        d=Math.max(d,2*smin,11);
 
-        let size=13;
-        if(typeof marker.size===&quot;number&quot;) size=marker.size;
-        else if(Array.isArray(marker.size) || ArrayBuffer.isView(marker.size)) size=Number(marker.size[i])||13;
-
-        pts.push({
-          x:x,y:y,name:String(tr.hovertext[i]||&quot;&quot;),
-          customdata:cd,color:color,size:Math.max(13,size)
-        });
+        let color=colors?colors[k]:marker.color;
+        if(!color || typeof color!==&quot;string&quot;) color=&quot;#475569&quot;;
+        const hn=Array.isArray(tr.hovertext)?tr.hovertext[k]:tr.hovertext;
+        pts.push({x:x,y:y,name:String(hn||&quot;&quot;),customdata:cd,color:color,size:d});
       }
     });
 
@@ -1277,36 +1369,40 @@ window.addEventListener(&quot;load&quot;, function(){
       const k=p.name+&quot;|&quot;+p.x+&quot;|&quot;+p.y;
       if(!seen.has(k)){seen.add(k);uniq.push(p);}
     });
+    /* 강조 대상이 없으면 기존 이름 레이어를 그대로 둔다 */
     if(!uniq.length) return;
+    uniq.sort(function(a,b){return b.size-a.size;});
 
-    Plotly.addTraces(gd,[
-      {
-        x:uniq.map(p=&gt;p.x),y:uniq.map(p=&gt;p.y),
-        mode:&quot;markers&quot;,
-        marker:{size:uniq.map(p=&gt;p.size+15),color:&quot;#334155&quot;,opacity:1,line:{width:0}},
-        hoverinfo:&quot;skip&quot;,showlegend:false,cliponaxis:false,name:&quot;sv_ring_outer&quot;
-      },
-      {
-        x:uniq.map(p=&gt;p.x),y:uniq.map(p=&gt;p.y),
-        mode:&quot;markers&quot;,
-        marker:{size:uniq.map(p=&gt;p.size+12),color:&quot;#ffffff&quot;,opacity:1,line:{width:0}},
-        hoverinfo:&quot;skip&quot;,showlegend:false,cliponaxis:false,name:&quot;sv_ring_white&quot;
-      },
-      {
-        x:uniq.map(p=&gt;p.x),y:uniq.map(p=&gt;p.y),
-        mode:&quot;markers+text&quot;,
-        marker:{size:uniq.map(p=&gt;p.size+3),color:uniq.map(p=&gt;p.color),opacity:1,line:{width:0}},
-        text:uniq.map(p=&gt;&quot;&lt;b&gt;&quot;+p.name+&quot;&lt;/b&gt;&quot;),
-        textposition:&quot;bottom center&quot;,
-        textfont:{family:&quot;Pretendard, Apple SD Gothic Neo, Malgun Gothic, sans-serif&quot;,size:11,color:&quot;#0f172a&quot;},
-        hovertext:uniq.map(p=&gt;p.name),
-        customdata:uniq.map(p=&gt;p.customdata),
-        hovertemplate:commonHover||&quot;&lt;b&gt;%{hovertext}&lt;/b&gt;&lt;extra&gt;&lt;/extra&gt;&quot;,
-        hoverlabel:{bgcolor:&quot;rgba(255,255,255,.98)&quot;,bordercolor:&quot;#94a3b8&quot;,
-          font:{family:&quot;Pretendard, Apple SD Gothic Neo, Malgun Gothic, sans-serif&quot;,size:13,color:&quot;#0f172a&quot;}},
-        showlegend:false,cliponaxis:false,name:&quot;sv_top_round&quot;
-      }
-    ]);
+    const X=uniq.map(p=&gt;p.x), Y=uniq.map(p=&gt;p.y);
+    const small=window.innerWidth&lt;=700;
+    const p0=hide.length?Plotly.restyle(gd,{visible:false},hide):Promise.resolve();
+    Promise.resolve(p0).then(function(){
+      return Plotly.addTraces(gd,[
+        {
+          x:X,y:Y,type:&quot;scatter&quot;,mode:&quot;markers&quot;,
+          marker:{size:uniq.map(p=&gt;p.size+11),color:&quot;#1e293b&quot;,opacity:1,line:{width:0}},
+          hoverinfo:&quot;skip&quot;,showlegend:false,cliponaxis:false,name:&quot;sv_ring_outer&quot;
+        },
+        {
+          x:X,y:Y,type:&quot;scatter&quot;,mode:&quot;markers&quot;,
+          marker:{size:uniq.map(p=&gt;p.size+8.5),color:&quot;#ffffff&quot;,opacity:1,line:{width:0}},
+          hoverinfo:&quot;skip&quot;,showlegend:false,cliponaxis:false,name:&quot;sv_ring_white&quot;
+        },
+        {
+          x:X,y:Y,type:&quot;scatter&quot;,mode:&quot;markers+text&quot;,
+          marker:{size:uniq.map(p=&gt;p.size),color:uniq.map(p=&gt;p.color),opacity:1,line:{width:0}},
+          text:uniq.map(p=&gt;&quot;&lt;b&gt;&quot;+p.name+&quot;&lt;/b&gt;&quot;),
+          textposition:&quot;bottom center&quot;,
+          textfont:{family:FONT,size:small?12.5:13,color:&quot;#0b1220&quot;},
+          hovertext:uniq.map(p=&gt;p.name),
+          customdata:uniq.map(p=&gt;p.customdata),
+          hovertemplate:commonHover||&quot;&lt;b&gt;%{hovertext}&lt;/b&gt;&lt;extra&gt;&lt;/extra&gt;&quot;,
+          hoverlabel:{bgcolor:&quot;rgba(255,255,255,.98)&quot;,bordercolor:&quot;#94a3b8&quot;,
+            font:{family:FONT,size:13,color:&quot;#0f172a&quot;}},
+          showlegend:false,cliponaxis:false,name:&quot;sv_top_round&quot;
+        }
+      ]);
+    });
   },380);
 });
 &lt;/script&gt;
@@ -1364,20 +1460,31 @@ window.addEventListener(&quot;load&quot;,function(){
         hoverdistance:52,
         spikedistance:52,
 
-        &quot;margin.t&quot;:58,
+        &quot;margin.t&quot;:84,
         &quot;margin.b&quot;:54,
         &quot;margin.l&quot;:46,
         &quot;margin.r&quot;:12,
         &quot;margin.pad&quot;:0,
 
         &quot;title.text&quot;:&quot;&quot;,
-        &quot;legend.title.text&quot;:&quot;&quot;,
-        &quot;legend.font.size&quot;:narrow?12:13,
-        &quot;legend.y&quot;:1.015,
-        &quot;legend.x&quot;:0,
-        &quot;legend.xanchor&quot;:&quot;left&quot;,
-        &quot;legend.yanchor&quot;:&quot;bottom&quot;,
-        &quot;legend.borderwidth&quot;:0,
+        &quot;legend.title.text&quot;:&quot;&lt;b&gt;드래프트 연도&lt;/b&gt;&quot;,
+        &quot;legend.title.side&quot;:&quot;top&quot;,
+        &quot;legend.title.font.size&quot;:12,
+        &quot;legend.title.font.color&quot;:&quot;#475569&quot;,
+        &quot;legend.orientation&quot;:&quot;h&quot;,
+        &quot;legend.font.size&quot;:narrow?12.5:13.5,
+        &quot;legend.font.color&quot;:&quot;#0f172a&quot;,
+        &quot;legend.itemsizing&quot;:&quot;constant&quot;,
+        &quot;legend.itemwidth&quot;:30,
+        &quot;legend.xref&quot;:&quot;container&quot;,
+        &quot;legend.x&quot;:0.5,
+        &quot;legend.xanchor&quot;:&quot;center&quot;,
+        &quot;legend.yref&quot;:&quot;container&quot;,
+        &quot;legend.y&quot;:0.992,
+        &quot;legend.yanchor&quot;:&quot;top&quot;,
+        &quot;legend.bgcolor&quot;:&quot;#f5f7ff&quot;,
+        &quot;legend.bordercolor&quot;:&quot;#c7d0ea&quot;,
+        &quot;legend.borderwidth&quot;:1,
 
         &quot;xaxis.automargin&quot;:true,
         &quot;yaxis.automargin&quot;:true,
@@ -1406,10 +1513,7 @@ window.addEventListener(&quot;load&quot;,function(){
     });
     if(idx.length!==3) return Promise.resolve();
     const small=window.innerWidth&lt;=700;
-    return Plotly.moveTraces(gd,idx).then(function(){
-      const n=gd.data.length;
-      return Plotly.restyle(gd,{&quot;textfont.size&quot;:small?12.5:12.5,&quot;textfont.color&quot;:&quot;#0b1220&quot;},[n-1]);
-    });
+    return Plotly.moveTraces(gd,idx);
   }
   setTimeout(function(){ raise().then(fit,fit); },700);
   setTimeout(function(){Plotly.Plots.resize(gd);},1500);
