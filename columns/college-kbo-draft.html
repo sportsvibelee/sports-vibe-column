@@ -438,40 +438,68 @@ window.addEventListener(&quot;load&quot;, function () {
       return a.y - b.y;
     });
 
-    const positions = [
-      &quot;top center&quot;, &quot;bottom center&quot;,
-      &quot;middle right&quot;, &quot;middle left&quot;,
-      &quot;top right&quot;, &quot;bottom left&quot;,
-      &quot;top left&quot;, &quot;bottom right&quot;
-    ];
+    // 상위 라운드 선수만 동일한 강조 스타일:
+    // [바깥 진회색 얇은 테두리] + [두꺼운 흰 띠] + [원래 색 점]
+    const outerSizes = labelPoints.map(p =&gt; p.size + 12);
+    const whiteSizes = labelPoints.map(p =&gt; p.size + 9);
+    const topSizes   = labelPoints.map(p =&gt; p.size + 3);
 
-    Plotly.addTraces(gd, {
-      x: labelPoints.map(p =&gt; p.x),
-      y: labelPoints.map(p =&gt; p.y),
-      text: labelPoints.map(p =&gt; &quot;&lt;b&gt;&quot; + p.name + &quot;&lt;/b&gt;&quot;),
-      textposition: labelPoints.map((p, i) =&gt; positions[i % positions.length]),
-      hovertext: labelPoints.map(p =&gt; p.name),
-      customdata: labelPoints.map(p =&gt; p.customdata),
-      mode: &quot;markers+text&quot;,
-      hovertemplate: commonHoverTemplate || &quot;&lt;b&gt;%{hovertext}&lt;/b&gt;&lt;extra&gt;&lt;/extra&gt;&quot;,
-      showlegend: false,
-      cliponaxis: false,
-      textfont: {
-        family: &quot;Pretendard, Apple SD Gothic Neo, Malgun Gothic, sans-serif&quot;,
-        size: 11,
-        color: &quot;#0f172a&quot;
+    Plotly.addTraces(gd, [
+      {
+        x: labelPoints.map(p =&gt; p.x),
+        y: labelPoints.map(p =&gt; p.y),
+        mode: &quot;markers&quot;,
+        marker: {
+          color: &quot;#475569&quot;,
+          size: outerSizes,
+          opacity: 1,
+          line: {width: 0}
+        },
+        hoverinfo: &quot;skip&quot;,
+        showlegend: false,
+        cliponaxis: false,
+        name: &quot;sv_ring_outer&quot;
       },
-      marker: {
-        color: labelPoints.map(p =&gt; p.color),
-        size: labelPoints.map(p =&gt; p.size),
-        opacity: 1,
-        line: {
+      {
+        x: labelPoints.map(p =&gt; p.x),
+        y: labelPoints.map(p =&gt; p.y),
+        mode: &quot;markers&quot;,
+        marker: {
           color: &quot;#ffffff&quot;,
-          width: 2
-        }
+          size: whiteSizes,
+          opacity: 1,
+          line: {width: 0}
+        },
+        hoverinfo: &quot;skip&quot;,
+        showlegend: false,
+        cliponaxis: false,
+        name: &quot;sv_ring_white&quot;
       },
-      name: &quot;상위라운드 지명자&quot;
-    });
+      {
+        x: labelPoints.map(p =&gt; p.x),
+        y: labelPoints.map(p =&gt; p.y),
+        text: labelPoints.map(p =&gt; &quot;&lt;b&gt;&quot; + p.name + &quot;&lt;/b&gt;&quot;),
+        textposition: &quot;bottom center&quot;,
+        hovertext: labelPoints.map(p =&gt; p.name),
+        customdata: labelPoints.map(p =&gt; p.customdata),
+        mode: &quot;markers+text&quot;,
+        hovertemplate: commonHoverTemplate || &quot;&lt;b&gt;%{hovertext}&lt;/b&gt;&lt;extra&gt;&lt;/extra&gt;&quot;,
+        showlegend: false,
+        cliponaxis: false,
+        textfont: {
+          family: &quot;Pretendard, Apple SD Gothic Neo, Malgun Gothic, sans-serif&quot;,
+          size: 11,
+          color: &quot;#0f172a&quot;
+        },
+        marker: {
+          color: labelPoints.map(p =&gt; p.color),
+          size: topSizes,
+          opacity: 1,
+          line: {width: 0}
+        },
+        name: &quot;상위라운드 지명자&quot;
+      }
+    ]);
   }, 360);
 });
 &lt;/script&gt;
@@ -673,40 +701,68 @@ window.addEventListener(&quot;load&quot;, function () {
       return a.y - b.y;
     });
 
-    const positions = [
-      &quot;top center&quot;, &quot;bottom center&quot;,
-      &quot;middle right&quot;, &quot;middle left&quot;,
-      &quot;top right&quot;, &quot;bottom left&quot;,
-      &quot;top left&quot;, &quot;bottom right&quot;
-    ];
+    // 상위 라운드 선수만 동일한 강조 스타일:
+    // [바깥 진회색 얇은 테두리] + [두꺼운 흰 띠] + [원래 색 점]
+    const outerSizes = labelPoints.map(p =&gt; p.size + 12);
+    const whiteSizes = labelPoints.map(p =&gt; p.size + 9);
+    const topSizes   = labelPoints.map(p =&gt; p.size + 3);
 
-    Plotly.addTraces(gd, {
-      x: labelPoints.map(p =&gt; p.x),
-      y: labelPoints.map(p =&gt; p.y),
-      text: labelPoints.map(p =&gt; &quot;&lt;b&gt;&quot; + p.name + &quot;&lt;/b&gt;&quot;),
-      textposition: labelPoints.map((p, i) =&gt; positions[i % positions.length]),
-      hovertext: labelPoints.map(p =&gt; p.name),
-      customdata: labelPoints.map(p =&gt; p.customdata),
-      mode: &quot;markers+text&quot;,
-      hovertemplate: commonHoverTemplate || &quot;&lt;b&gt;%{hovertext}&lt;/b&gt;&lt;extra&gt;&lt;/extra&gt;&quot;,
-      showlegend: false,
-      cliponaxis: false,
-      textfont: {
-        family: &quot;Pretendard, Apple SD Gothic Neo, Malgun Gothic, sans-serif&quot;,
-        size: 11,
-        color: &quot;#0f172a&quot;
+    Plotly.addTraces(gd, [
+      {
+        x: labelPoints.map(p =&gt; p.x),
+        y: labelPoints.map(p =&gt; p.y),
+        mode: &quot;markers&quot;,
+        marker: {
+          color: &quot;#475569&quot;,
+          size: outerSizes,
+          opacity: 1,
+          line: {width: 0}
+        },
+        hoverinfo: &quot;skip&quot;,
+        showlegend: false,
+        cliponaxis: false,
+        name: &quot;sv_ring_outer&quot;
       },
-      marker: {
-        color: labelPoints.map(p =&gt; p.color),
-        size: labelPoints.map(p =&gt; p.size),
-        opacity: 1,
-        line: {
+      {
+        x: labelPoints.map(p =&gt; p.x),
+        y: labelPoints.map(p =&gt; p.y),
+        mode: &quot;markers&quot;,
+        marker: {
           color: &quot;#ffffff&quot;,
-          width: 2
-        }
+          size: whiteSizes,
+          opacity: 1,
+          line: {width: 0}
+        },
+        hoverinfo: &quot;skip&quot;,
+        showlegend: false,
+        cliponaxis: false,
+        name: &quot;sv_ring_white&quot;
       },
-      name: &quot;상위라운드 지명자&quot;
-    });
+      {
+        x: labelPoints.map(p =&gt; p.x),
+        y: labelPoints.map(p =&gt; p.y),
+        text: labelPoints.map(p =&gt; &quot;&lt;b&gt;&quot; + p.name + &quot;&lt;/b&gt;&quot;),
+        textposition: &quot;bottom center&quot;,
+        hovertext: labelPoints.map(p =&gt; p.name),
+        customdata: labelPoints.map(p =&gt; p.customdata),
+        mode: &quot;markers+text&quot;,
+        hovertemplate: commonHoverTemplate || &quot;&lt;b&gt;%{hovertext}&lt;/b&gt;&lt;extra&gt;&lt;/extra&gt;&quot;,
+        showlegend: false,
+        cliponaxis: false,
+        textfont: {
+          family: &quot;Pretendard, Apple SD Gothic Neo, Malgun Gothic, sans-serif&quot;,
+          size: 11,
+          color: &quot;#0f172a&quot;
+        },
+        marker: {
+          color: labelPoints.map(p =&gt; p.color),
+          size: topSizes,
+          opacity: 1,
+          line: {width: 0}
+        },
+        name: &quot;상위라운드 지명자&quot;
+      }
+    ]);
   }, 360);
 });
 &lt;/script&gt;
@@ -910,40 +966,68 @@ window.addEventListener(&quot;load&quot;, function () {
       return a.y - b.y;
     });
 
-    const positions = [
-      &quot;top center&quot;, &quot;bottom center&quot;,
-      &quot;middle right&quot;, &quot;middle left&quot;,
-      &quot;top right&quot;, &quot;bottom left&quot;,
-      &quot;top left&quot;, &quot;bottom right&quot;
-    ];
+    // 상위 라운드 선수만 동일한 강조 스타일:
+    // [바깥 진회색 얇은 테두리] + [두꺼운 흰 띠] + [원래 색 점]
+    const outerSizes = labelPoints.map(p =&gt; p.size + 12);
+    const whiteSizes = labelPoints.map(p =&gt; p.size + 9);
+    const topSizes   = labelPoints.map(p =&gt; p.size + 3);
 
-    Plotly.addTraces(gd, {
-      x: labelPoints.map(p =&gt; p.x),
-      y: labelPoints.map(p =&gt; p.y),
-      text: labelPoints.map(p =&gt; &quot;&lt;b&gt;&quot; + p.name + &quot;&lt;/b&gt;&quot;),
-      textposition: labelPoints.map((p, i) =&gt; positions[i % positions.length]),
-      hovertext: labelPoints.map(p =&gt; p.name),
-      customdata: labelPoints.map(p =&gt; p.customdata),
-      mode: &quot;markers+text&quot;,
-      hovertemplate: commonHoverTemplate || &quot;&lt;b&gt;%{hovertext}&lt;/b&gt;&lt;extra&gt;&lt;/extra&gt;&quot;,
-      showlegend: false,
-      cliponaxis: false,
-      textfont: {
-        family: &quot;Pretendard, Apple SD Gothic Neo, Malgun Gothic, sans-serif&quot;,
-        size: 11,
-        color: &quot;#0f172a&quot;
+    Plotly.addTraces(gd, [
+      {
+        x: labelPoints.map(p =&gt; p.x),
+        y: labelPoints.map(p =&gt; p.y),
+        mode: &quot;markers&quot;,
+        marker: {
+          color: &quot;#475569&quot;,
+          size: outerSizes,
+          opacity: 1,
+          line: {width: 0}
+        },
+        hoverinfo: &quot;skip&quot;,
+        showlegend: false,
+        cliponaxis: false,
+        name: &quot;sv_ring_outer&quot;
       },
-      marker: {
-        color: labelPoints.map(p =&gt; p.color),
-        size: labelPoints.map(p =&gt; p.size),
-        opacity: 1,
-        line: {
+      {
+        x: labelPoints.map(p =&gt; p.x),
+        y: labelPoints.map(p =&gt; p.y),
+        mode: &quot;markers&quot;,
+        marker: {
           color: &quot;#ffffff&quot;,
-          width: 2
-        }
+          size: whiteSizes,
+          opacity: 1,
+          line: {width: 0}
+        },
+        hoverinfo: &quot;skip&quot;,
+        showlegend: false,
+        cliponaxis: false,
+        name: &quot;sv_ring_white&quot;
       },
-      name: &quot;상위라운드 지명자&quot;
-    });
+      {
+        x: labelPoints.map(p =&gt; p.x),
+        y: labelPoints.map(p =&gt; p.y),
+        text: labelPoints.map(p =&gt; &quot;&lt;b&gt;&quot; + p.name + &quot;&lt;/b&gt;&quot;),
+        textposition: &quot;bottom center&quot;,
+        hovertext: labelPoints.map(p =&gt; p.name),
+        customdata: labelPoints.map(p =&gt; p.customdata),
+        mode: &quot;markers+text&quot;,
+        hovertemplate: commonHoverTemplate || &quot;&lt;b&gt;%{hovertext}&lt;/b&gt;&lt;extra&gt;&lt;/extra&gt;&quot;,
+        showlegend: false,
+        cliponaxis: false,
+        textfont: {
+          family: &quot;Pretendard, Apple SD Gothic Neo, Malgun Gothic, sans-serif&quot;,
+          size: 11,
+          color: &quot;#0f172a&quot;
+        },
+        marker: {
+          color: labelPoints.map(p =&gt; p.color),
+          size: topSizes,
+          opacity: 1,
+          line: {width: 0}
+        },
+        name: &quot;상위라운드 지명자&quot;
+      }
+    ]);
   }, 360);
 });
 &lt;/script&gt;
@@ -1145,40 +1229,68 @@ window.addEventListener(&quot;load&quot;, function () {
       return a.y - b.y;
     });
 
-    const positions = [
-      &quot;top center&quot;, &quot;bottom center&quot;,
-      &quot;middle right&quot;, &quot;middle left&quot;,
-      &quot;top right&quot;, &quot;bottom left&quot;,
-      &quot;top left&quot;, &quot;bottom right&quot;
-    ];
+    // 상위 라운드 선수만 동일한 강조 스타일:
+    // [바깥 진회색 얇은 테두리] + [두꺼운 흰 띠] + [원래 색 점]
+    const outerSizes = labelPoints.map(p =&gt; p.size + 12);
+    const whiteSizes = labelPoints.map(p =&gt; p.size + 9);
+    const topSizes   = labelPoints.map(p =&gt; p.size + 3);
 
-    Plotly.addTraces(gd, {
-      x: labelPoints.map(p =&gt; p.x),
-      y: labelPoints.map(p =&gt; p.y),
-      text: labelPoints.map(p =&gt; &quot;&lt;b&gt;&quot; + p.name + &quot;&lt;/b&gt;&quot;),
-      textposition: labelPoints.map((p, i) =&gt; positions[i % positions.length]),
-      hovertext: labelPoints.map(p =&gt; p.name),
-      customdata: labelPoints.map(p =&gt; p.customdata),
-      mode: &quot;markers+text&quot;,
-      hovertemplate: commonHoverTemplate || &quot;&lt;b&gt;%{hovertext}&lt;/b&gt;&lt;extra&gt;&lt;/extra&gt;&quot;,
-      showlegend: false,
-      cliponaxis: false,
-      textfont: {
-        family: &quot;Pretendard, Apple SD Gothic Neo, Malgun Gothic, sans-serif&quot;,
-        size: 11,
-        color: &quot;#0f172a&quot;
+    Plotly.addTraces(gd, [
+      {
+        x: labelPoints.map(p =&gt; p.x),
+        y: labelPoints.map(p =&gt; p.y),
+        mode: &quot;markers&quot;,
+        marker: {
+          color: &quot;#475569&quot;,
+          size: outerSizes,
+          opacity: 1,
+          line: {width: 0}
+        },
+        hoverinfo: &quot;skip&quot;,
+        showlegend: false,
+        cliponaxis: false,
+        name: &quot;sv_ring_outer&quot;
       },
-      marker: {
-        color: labelPoints.map(p =&gt; p.color),
-        size: labelPoints.map(p =&gt; p.size),
-        opacity: 1,
-        line: {
+      {
+        x: labelPoints.map(p =&gt; p.x),
+        y: labelPoints.map(p =&gt; p.y),
+        mode: &quot;markers&quot;,
+        marker: {
           color: &quot;#ffffff&quot;,
-          width: 2
-        }
+          size: whiteSizes,
+          opacity: 1,
+          line: {width: 0}
+        },
+        hoverinfo: &quot;skip&quot;,
+        showlegend: false,
+        cliponaxis: false,
+        name: &quot;sv_ring_white&quot;
       },
-      name: &quot;상위라운드 지명자&quot;
-    });
+      {
+        x: labelPoints.map(p =&gt; p.x),
+        y: labelPoints.map(p =&gt; p.y),
+        text: labelPoints.map(p =&gt; &quot;&lt;b&gt;&quot; + p.name + &quot;&lt;/b&gt;&quot;),
+        textposition: &quot;bottom center&quot;,
+        hovertext: labelPoints.map(p =&gt; p.name),
+        customdata: labelPoints.map(p =&gt; p.customdata),
+        mode: &quot;markers+text&quot;,
+        hovertemplate: commonHoverTemplate || &quot;&lt;b&gt;%{hovertext}&lt;/b&gt;&lt;extra&gt;&lt;/extra&gt;&quot;,
+        showlegend: false,
+        cliponaxis: false,
+        textfont: {
+          family: &quot;Pretendard, Apple SD Gothic Neo, Malgun Gothic, sans-serif&quot;,
+          size: 11,
+          color: &quot;#0f172a&quot;
+        },
+        marker: {
+          color: labelPoints.map(p =&gt; p.color),
+          size: topSizes,
+          opacity: 1,
+          line: {width: 0}
+        },
+        name: &quot;상위라운드 지명자&quot;
+      }
+    ]);
   }, 360);
 });
 &lt;/script&gt;
